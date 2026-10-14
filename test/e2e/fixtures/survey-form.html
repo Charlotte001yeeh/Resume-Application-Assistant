@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>问卷式表单（div 标题 + 通用占位符）</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; background: #f7f8fa; margin: 0; }
+    .wrap { max-width: 720px; margin: 24px auto; background: #fff; padding: 24px 30px; border-radius: 8px; }
+    .field { margin: 16px 0; }
+    .field-title { color: #444; margin-bottom: 6px; }
+    .field-input input, .field-input textarea, .field-input select { width: 100%; padding: 8px 10px; border: 1px solid #ccd3dd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>应聘登记（问卷式布局）</h1>
+    <div class="field"><div class="field-title">姓名</div><div class="field-input"><input type="text" placeholder="请输入" /></div></div>
+    <div class="field"><div class="field-title">手机号码</div><div class="field-input"><input type="text" placeholder="请输入" /></div></div>
+    <div class="field"><div class="field-title">电子邮箱</div><div class="field-input"><input type="text" placeholder="请输入" /></div></div>
+    <div class="field"><div class="field-title">最高学历</div><div class="field-input">
+      <select><option value="">请选择</option><option value="v0">专科</option><option value="v1">本科</option><option value="v2">硕士</option><option value="v3">博士</option></select>
+    </div></div>
+    <div class="field"><div class="field-title">自我评价</div><div class="field-input"><textarea placeholder="请输入"></textarea></div></div>
+    <div class="field"><div class="field-title">毕业院校</div><div class="field-input"><input type="text" placeholder="请输入" /></div></div>
+    <div class="field"><div class="field-title">工作性质（单选）</div><div class="field-input"><div class="options">
+      <div class="radio-item"><span class="radio-box"><input type="radio" value="v0" aria-hidden="true" tabindex="-1" /></span>全职</div>
+      <div class="radio-item"><span class="radio-box"><input type="radio" value="v1" aria-hidden="true" tabindex="-1" /></span>兼职</div>
+      <div class="radio-item"><span class="radio-box"><input type="radio" value="v2" aria-hidden="true" tabindex="-1" /></span>实习</div>
+    </div></div></div>
+  </div>
+</body>
+</html>

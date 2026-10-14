@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NovaTech - Frontend Engineer Application</title>
+  <style>
+    body { font: 14px/1.7 system-ui, sans-serif; margin: 0; background: #fafafa; color: #222; }
+    .wrap { max-width: 720px; margin: 24px auto; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 26px 32px; }
+    h1 { font-size: 19px; }
+    h2 { font-size: 15px; margin: 22px 0 10px; color: #1a56c4; }
+    .row { margin: 10px 0; }
+    label { display: block; margin-bottom: 4px; color: #444; }
+    input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd3dd; border-radius: 5px; font-size: 14px; box-sizing: border-box; }
+    textarea { min-height: 80px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Application for Frontend Engineer</h1>
+
+    <h2>Personal</h2>
+    <div class="row">
+      <label for="fname">Full Name</label>
+      <input type="text" id="fname" name="fname" data-state="fname" autocomplete="name" />
+    </div>
+    <div class="row">
+      <label for="tel">Contact Number</label>
+      <input type="tel" id="tel" name="tel" data-state="tel" autocomplete="tel" />
+    </div>
+    <div class="row">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" data-state="email" autocomplete="email" />
+    </div>
+    <div class="row">
+      <label for="gender">Gender</label>
+      <select id="gender" name="gender" data-state="gender">
+        <option value="">Please select</option>
+        <option value="v0">Male</option>
+        <option value="v1">Female</option>
+        <option value="v2">Prefer not to say</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob" name="dob" data-state="dob" autocomplete="bday" />
+    </div>
+
+    <h2>Education</h2>
+    <div class="row">
+      <label for="edu">Highest Education</label>
+      <select id="edu" name="edu" data-state="edu">
+        <option value="">Please select</option>
+        <option value="v0">Associate</option>
+        <option value="v1">Bachelor</option>
+        <option value="v2">Master</option>
+        <option value="v3">Doctor</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="uni">University</label>
+      <input type="text" id="uni" name="uni" data-state="uni" />
+    </div>
+    <div class="row">
+      <label for="major">Major</label>
+      <input type="text" id="major" name="major" data-state="major" />
+    </div>
+
+    <h2>Experience</h2>
+    <div class="row">
+      <label for="years">Years of Experience</label>
+      <input type="number" id="years" name="years" data-state="years" />
+    </div>
+    <div class="row">
+      <label for="company">Current Company</label>
+      <input type="text" id="company" name="company" data-state="company" />
+    </div>
+    <div class="row">
+      <label for="title">Current Job Title</label>
+      <input type="text" id="title" name="title" data-state="title" />
+    </div>
+
+    <h2>Expectation</h2>
+    <div class="row">
+      <label for="position">Desired Position</label>
+      <input type="text" id="position" name="position" data-state="position" />
+    </div>
+    <div class="row">
+      <label for="salary">Expected Salary</label>
+      <input type="text" id="salary" name="salary" data-state="salary" />
+    </div>
+    <div class="row">
+      <label for="start">Available to Start</label>
+      <select id="start" name="start" data-state="start">
+        <option value="">Please select</option>
+        <option value="v0">Immediately</option>
+        <option value="v1">Within a week</option>
+        <option value="v2">Within a month</option>
+        <option value="v3">Negotiable</option>
+      </select>
+    </div>
+
+    <h2>More about you</h2>
+    <div class="row">
+      <label for="selfeval">Self Evaluation</label>
+      <textarea id="selfeval" name="selfeval" data-state="selfeval"></textarea>
+    </div>
+    <div class="row">
+      <label for="address">Address</label>
+      <textarea id="address" name="address" data-state="address"></textarea>
+    </div>
+    <div class="row">
+      <label for="zip">Zip Code</label>
+      <input type="text" id="zip" name="zip" data-state="zip" autocomplete="postal-code" />
+    </div>
+  </div>
+
+  <script>
+    window.__cvEvents = {};
+    for (const type of ['input', 'change']) {
+      document.addEventListener(type, (e) => {
+        const t = e.target;
+        const key = (t.id || t.name || t.tagName) + ':' + type;
+        window.__cvEvents[key] = (window.__cvEvents[key] || 0) + 1;
+      }, true);
+    }
+  </script>
+</body>
+</html>

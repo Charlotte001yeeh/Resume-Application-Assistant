@@ -1,0 +1,15 @@
+# Build / dependency artifacts
+node_modules/
+*.tgz
+
+# Generated test outputs (regenerate with npm run test:e2e / test:live)
+test/artifacts/
+
+# Local / OS noise
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor state
+.vscode/
+.idea/

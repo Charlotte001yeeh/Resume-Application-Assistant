@@ -1,0 +1,16 @@
+# Normalize line endings for a cross-platform repository
+* text=auto eol=lf
+
+# Binary assets (must never be line-ending converted)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tgz binary
+
+# Generated test outputs are never committed (see .gitignore)
+test/artifacts/** -text

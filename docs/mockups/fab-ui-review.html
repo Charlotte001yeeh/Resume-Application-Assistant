@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CV Plugin — Floating Widget Interaction Review (prototype)</title>
+<style>
+  :root {
+    --cv-blue: #2b6df6;
+    --cv-blue-dark: #1b52c9;
+    --cv-text: #1f2430;
+    --cv-muted: #6b7280;
+    --cv-border: #e5e8ef;
+    --cv-ok: #1a7f37;
+    --cv-warn: #c26a00;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 14px/1.6 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+    color: var(--cv-text);
+    background: #f3f5f9;
+  }
+
+  /* ── review toolbar (prototype controls; not part of the product) ── */
+  .review-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: #101828; color: #fff;
+    padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .review-bar b { font-size: 13px; letter-spacing: .02em; }
+  .review-bar .sep { width: 1px; height: 20px; background: #344054; }
+  .review-bar label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .review-bar button {
+    background: #1d2939; color: #fff; border: 1px solid #344054;
+    border-radius: 6px; padding: 5px 10px; font-size: 13px; cursor: pointer;
+  }
+  .review-bar button:hover { background: #344054; }
+  .review-bar .hint { font-size: 12px; color: #98a2b3; margin-left: auto; }
+
+  /* ── fake application page (to make the widget placement realistic) ── */
+  .page { max-width: 760px; margin: 24px auto 160px; padding: 26px 30px; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+  .page h1 { font-size: 20px; margin: 0 0 4px; }
+  .page .sub { color: var(--cv-muted); font-size: 13px; margin-bottom: 18px; }
+  .field { margin: 14px 0; }
+  .field label { display: block; font-size: 13px; color: #475467; margin-bottom: 6px; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--cv-border); border-radius: 6px; font-size: 14px; background: #fff; }
+  .state-tag { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #eef4ff; color: var(--cv-blue); margin-left: 8px; }
+
+  /* ── widget ── */
+  .cv-widget { position: fixed; right: 26px; bottom: 26px; z-index: 40; }
+  .cv-widget.off { display: none; }
+
+  /* the ball: the ONLY thing shown by default — almost transparent glass ball */
+  .cv-fab {
+    width: 54px; height: 54px; border-radius: 50%; cursor: pointer;
+    background: rgba(43,109,246,.14);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    border: 1px solid rgba(43,109,246,.55);
+    color: var(--cv-blue); font-weight: 700; font-size: 15px; letter-spacing: .5px;
+    box-shadow: 0 4px 14px rgba(43,109,246,.20);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 3;
+    transition: transform .16s ease, background .16s ease, box-shadow .16s ease;
+  }
+  .cv-fab:hover { transform: translateY(-2px); background: rgba(43,109,246,.26); box-shadow: 0 8px 20px rgba(43,109,246,.30); }
+  .cv-fab:active { transform: scale(.96); }
+
+  /* ring state: buttons orbit the ball inside the up-left quadrant (always fully visible at the corner) */
+  .cv-ring {
+    position: absolute; right: 27px; bottom: 27px; width: 168px; height: 168px; z-index: 1;
+    border-radius: 100% 0 0 0;              /* quarter disc opening up-left from the ball centre */
+    background: rgba(255,255,255,.36);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    border: 1px solid rgba(255,255,255,.75);
+    box-shadow: 0 6px 22px rgba(16,24,40,.10);
+    opacity: 0; pointer-events: none;
+    transform: scale(.9); transform-origin: bottom right;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .cv-widget.ring .cv-ring { opacity: 1; pointer-events: auto; transform: scale(1); }
+  .cv-widget.ring .cv-ring-btn { opacity: 1; visibility: visible; }
+
+  /* alternative layout: translucent pill stack above the ball */
+  .cv-stack {
+    position: absolute; right: 0; bottom: 68px; z-index: 2;
+    display: none; flex-direction: column; gap: 8px; padding: 8px;
+    background: rgba(255,255,255,.40);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    border: 1px solid rgba(255,255,255,.75); border-radius: 14px;
+    box-shadow: 0 6px 22px rgba(16,24,40,.12);
+  }
+  .cv-widget.ring.layout-stack .cv-stack { display: flex; }
+  .cv-widget.ring.layout-stack .cv-ring { display: none; }
+  .cv-widget.ring.layout-stack .cv-stack .cv-ring-btn {
+    position: static; width: 128px; height: 40px; border-radius: 20px; opacity: 1; visibility: visible;
+    font-size: 12.5px;
+  }
+
+  .cv-ring-btn {
+    position: absolute; width: 48px; height: 48px; border-radius: 50%; z-index: 2;
+    border: 1px solid rgba(43,109,246,.35);
+    background: rgba(255,255,255,.96);
+    color: var(--cv-blue);
+    font-size: 11.5px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(16,24,40,.16);
+    transition: transform .14s ease, background .14s ease, color .14s ease, opacity .16s ease;
+    white-space: nowrap;
+    opacity: 0; visibility: hidden;
+  }
+  .cv-ring-btn:hover { background: var(--cv-blue); color: #fff; transform: scale(1.06); }
+  /* arc around the ball: 90° (up) → 120° → 150° → 180° (left), radius 135px (clear gaps, no clipping) */
+  .cv-ring-btn.pos-1 { right: 4px;   bottom: 139px; } /* up */
+  .cv-ring-btn.pos-2 { right: 72px;  bottom: 121px; } /* up-left, near vertical */
+  .cv-ring-btn.pos-3 { right: 121px; bottom: 72px;  } /* up-left, near horizontal */
+  .cv-ring-btn.pos-4 { right: 139px; bottom: 4px;   } /* left */
+
+  /* content panel: opaque white, opens only after a function button is clicked */
+  .cv-panel {
+    position: absolute; right: 0; bottom: 70px; width: 360px; max-height: 68vh;
+    background: #fff; border-radius: 12px; border: 1px solid var(--cv-border);
+    box-shadow: 0 18px 44px rgba(16,24,40,.20);
+    display: none; flex-direction: column; overflow: hidden;
+  }
+  .cv-widget.panel .cv-panel { display: flex; }
+  .cv-panel header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-bottom: 1px solid var(--cv-border);
+  }
+  .cv-panel header h3 { margin: 0; font-size: 14px; }
+  .cv-panel header .close { border: none; background: #f2f4f7; color: #475467; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-size: 15px; line-height: 1; }
+  .cv-panel header .close:hover { background: #e4e7ec; }
+  .cv-stat { padding: 10px 14px; font-size: 12px; color: var(--cv-muted); background: #fafbfc; border-bottom: 1px solid var(--cv-border); }
+  .cv-body { padding: 8px 14px 14px; overflow: auto; }
+  .cv-item { padding: 10px 0; border-bottom: 1px dashed #eef0f5; font-size: 13px; }
+  .cv-item:last-child { border-bottom: none; }
+  .cv-item .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-right: 6px; background: #e8f0ff; color: var(--cv-blue); }
+  .cv-item .tag.ok { background: #e6f7ec; color: var(--cv-ok); }
+  .cv-item .tag.warn { background: #fff3e0; color: var(--cv-warn); }
+  .cv-item .why { color: var(--cv-muted); font-size: 12px; margin-top: 3px; }
+  .cv-item .content { margin: 5px 0; padding: 8px 10px; background: #f8fafc; border-radius: 6px; color: #344054; }
+  .cv-item button, .cv-actions button {
+    margin-top: 6px; padding: 5px 10px; font-size: 12px; border-radius: 6px;
+    border: 1px solid var(--cv-border); background: #fff; cursor: pointer;
+  }
+  .cv-item button:hover, .cv-actions button:hover { border-color: var(--cv-blue); color: var(--cv-blue); }
+  .cv-actions button.primary { background: var(--cv-blue); border-color: var(--cv-blue); color: #fff; }
+  .cv-batch-row { padding: 8px 0; border-bottom: 1px dashed #eef0f5; }
+  .cv-batch-row select { width: 100%; padding: 5px 6px; margin: 4px 0; border: 1px solid var(--cv-border); border-radius: 6px; font-size: 12px; }
+  .cv-note { font-size: 11px; color: var(--cv-muted); padding: 0 14px 12px; }
+  .mock-note { max-width: 760px; margin: 0 auto 40px; padding: 14px 18px; background: #fff; border-left: 3px solid var(--cv-blue); border-radius: 6px; font-size: 13px; color: #475467; }
+  .mock-note code { background: #f2f4f7; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ── prototype controls ─────────────────────────────────────────── -->
+<div class="review-bar">
+  <b>PROTOTYPE — floating widget interaction</b>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="setEnabled" checked /> Floating ball enabled (chrome setting)</label>
+  <span class="sep"></span>
+  <button id="btnLayout">Layout: Arc</button>
+  <button id="btnLang">中文</button>
+  <button id="btnReset">Reset to default</button>
+  <span class="hint" id="stateHint">state: ball (collapsed) — nothing else on screen</span>
+</div>
+
+<!-- ── fake application page ──────────────────────────────────────── -->
+<main class="page">
+  <h1 id="pageTitle">Senior Frontend Engineer — Application Form</h1>
+  <div class="sub" id="pageSub">A real-looking application page, so you can judge the widget in context.</div>
+  <div class="field"><label id="lbl1">Full name</label><input value="Zhang San" /></div>
+  <div class="field"><label id="lbl2">Mobile</label><input value="138 0000 0000" /></div>
+  <div class="field"><label id="lbl3">Highest education</label>
+    <select><option>Bachelor</option><option selected>Master</option><option>PhD</option></select>
+  </div>
+  <div class="field"><label id="lbl4">Expected position</label><input value="Senior Frontend Architect" /></div>
+</main>
+
+<div class="mock-note" id="notes">
+  <b>What this prototype demonstrates</b><br />
+  1. The extension option can turn the floating ball on/off.<br />
+  2. Default state shows <b>only the ball</b> — no panel, no text.<br />
+  3. Clicking the ball reveals <b>4 function buttons arranged around it</b> with a <b>translucent</b> background and <b>no explanation text</b>.<br />
+  4. Clicking a function button opens the existing content view (display / explanation / actions) on an <b>opaque white</b> background.
+</div>
+
+<!-- ── the widget ─────────────────────────────────────────────────── -->
+<div class="cv-widget" id="widget">
+  <div class="cv-ring"></div>
+  <div class="cv-stack" id="stackBox"></div>
+  <button class="cv-ring-btn pos-1" data-act="fill" id="rb1">Fill</button>
+  <button class="cv-ring-btn pos-2" data-act="review" id="rb2">Check</button>
+  <button class="cv-ring-btn pos-3" data-act="study" id="rb3">Learn</button>
+  <button class="cv-ring-btn pos-4" data-act="learn" id="rb4">Save</button>
+  <button class="cv-fab" id="fab">CV</button>
+  <div class="cv-panel" id="panel">
+    <header><h3 id="panelTitle">Resume Assistant</h3><button class="close" id="btnClose">×</button></header>
+    <div class="cv-stat" id="stat"></div>
+    <div class="cv-body" id="body"></div>
+    <div class="cv-note" id="panelNote"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── demo content (same shapes as the real panel reports) ──
+  const CONTENT = {
+    fill: {
+      title: { en: 'One-click fill', zh: '一键填充' },
+      stat: {
+        en: 'Scanned 26 fields · Matched 21 · Auto-filled 12 · Needs Review 6 · Unrecognized 5',
+        zh: '扫描 26 个字段 · 匹配 21 · 自动填充 12 · 待确认 6 · 未识别 5',
+      },
+      html: () => `
+        <div class="cv-item"><span class="tag ok">${T('Filled')}</span><b>姓名</b> → 张三</div>
+        <div class="cv-item"><span class="tag ok">${T('Filled')}</span><b>手机号码</b> → 13800000000</div>
+        <div class="cv-item"><span class="tag ok">${T('Filled')}</span><b>意向岗位</b> → 资深前端架构师</div>
+        <div class="cv-item"><span class="tag warn">${T('Needs Review')}</span><b>毕业院校及所学专业</b>
+          <div class="why">${T('why-composite')}</div></div>
+        <div class="cv-item"><span class="tag warn">${T('Needs Review')}</span><b>${T('batchTitle')}</b>
+          ${[1, 2].map((i) => `
+            <div class="cv-batch-row">
+              <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" checked /> <b>${i === 1 ? '最近一次工作经验' : '所获证书'}</b></label>
+              <select>
+                <option>${i === 1 ? '工作经历' : '证书'}</option>
+                <option>${i === 1 ? '项目经历' : '其他'}</option>
+                <option value="">${T('ignoreOption')}</option>
+              </select>
+              <div class="why">${T('batchWhy')}</div>
+            </div>`).join('')}
+          <div class="cv-actions"><button>${T('Apply Selected')}</button> <button>${T('Ignore All')}</button></div>
+        </div>`,
+    },
+    review: {
+      title: { en: 'Resume check', zh: '简历体检' },
+      stat: { en: 'Fields 26 · Auto-matched 12 · Needs Review 6 · Unseen 5 · Suggestions 4', zh: '字段 26 · 自动匹配 12 · 待确认 6 · 未见 5 · 建议 4' },
+      html: () => `
+        <div class="cv-item"><span class="tag">${T('Generated')}</span><b>自我评价</b>
+          <div class="content">${T('genSample')}</div>
+          <div class="why">${T('genWhy')}</div>
+          <button>${T('Apply & Fill')}</button></div>
+        <div class="cv-item"><span class="tag">${T('Similar wording')}</span><b>项目经历</b>
+          <div class="content">${T('simSample')}</div>
+          <button>${T('Apply & Fill')}</button></div>
+        <div class="cv-item"><span class="tag warn">${T('Optimized')} · length</span><b>技能特长</b>
+          <div class="content">${T('optSample')}</div>
+          <div class="why">${T('optWhy')}</div>
+          <button>${T('Apply & Fill')}</button></div>`,
+    },
+    study: {
+      title: { en: 'Sample learning', zh: '样例学习' },
+      stat: { en: 'Filled 12 items · Aliases learned 3 · Similar merged 2 · Fields created 1 · Samples 4', zh: '已填 12 项 · 学到别名 3 · 相似归并 2 · 新建字段 1 · 样例 4' },
+      html: () => `
+        <div class="cv-item"><span class="tag ok">${T('Alias Learned')}</span><b>期望工作城市</b> → desiredCity</div>
+        <div class="cv-item"><span class="tag ok">${T('New Field')}</span><b>获奖经历</b>
+          <div class="content">2023 年度优秀员工</div></div>
+        <div class="cv-item"><span class="tag ok">${T('Profile Improved')}</span><b>自我评价</b> → selfIntro
+          <div class="content">${T('genSample')}</div>
+          <div class="why">Saved to profile</div></div>`,
+    },
+    learn: {
+      title: { en: 'Learn from this page', zh: '从本页学习' },
+      stat: { en: 'Found 8 fields to write back · 6 written', zh: '发现 8 个可回写字段 · 已回写 6 个' },
+      html: () => `
+        <div class="cv-item"><b>期望薪资</b>: 35-45K
+          <div class="why">${T('currentValue')} 30-40K</div>
+          <button>${T('Update')}</button></div>
+        <div class="cv-item"><b>到岗时间</b>: 一个月内
+          <div class="why">${T('currentValue')} （空）</div>
+          <button>${T('Update')}</button></div>`,
+    },
+  };
+
+  const STRINGS = {
+    en: {
+      'Filled': 'Filled', 'Needs Review': 'Needs Review', 'batchTitle': '3 low-confidence fields (confirm or ignore in batch)',
+      'ignoreOption': '— Ignore this item (do not suggest again) —',
+      'batchWhy': 'Page value: 5 年 → Suggested: 5 years of experience',
+      'Apply Selected': 'Apply Selected', 'Ignore All': 'Ignore All',
+      'why-composite': 'Composite field — please split manually',
+      'Generated': 'Generated', 'Similar wording': 'Similar wording', 'Optimized': 'Optimized',
+      'Apply & Fill': 'Apply & Fill',
+      'genSample': 'Five years of enterprise frontend experience; led the component library and micro-frontend rollout.',
+      'genWhy': 'Not found in the profile — summarized from your profile and past samples.',
+      'simSample': 'Data visualization platform: led the charting engine, 50k requests/day, render time down 35%.',
+      'optSample': 'React / TypeScript / Vite / micro-frontend / performance tuning (kept within the 60-character limit).',
+      'optWhy': 'Original exceeded the field limit and was truncated.',
+      'Alias Learned': 'Alias Learned', 'New Field': 'New Field', 'Profile Improved': 'Profile Improved',
+      'currentValue': 'Current profile value:', 'Update': 'Update Profile With Page Content',
+      'Saved to profile': 'Saved to profile',
+      'panelNote': 'Click × or the ball to collapse back to the ball.',
+      'pageTitle': 'Senior Frontend Engineer — Application Form',
+      'pageSub': 'A real-looking application page, so you can judge the widget in context.',
+      'lbl1': 'Full name', 'lbl2': 'Mobile', 'lbl3': 'Highest education', 'lbl4': 'Expected position',
+      'rb1': 'Fill', 'rb2': 'Check', 'rb3': 'Learn', 'rb4': 'Save',
+      'panelTitle': 'Resume Assistant',
+      'stateBall': 'state: ball (collapsed) — nothing else on screen',
+      'stateRing': 'state: ring — 4 function buttons, translucent background, no description text',
+      'statePanel': 'state: content — opaque white panel for the selected function',
+      'hintOff': 'floating ball disabled — nothing rendered on the page',
+    },
+    zh: {
+      'Filled': '已填充', 'Needs Review': '待确认', 'batchTitle': '3 个低置信度字段（可批量确认/忽略）',
+      'ignoreOption': '— 忽略此项（不再建议） —',
+      'batchWhy': '页面值：5 年 → 建议填入：5 years of experience',
+      'Apply Selected': '应用所选项', 'Ignore All': '全部忽略',
+      'why-composite': '复合字段，建议人工拆分填写',
+      'Generated': '补充生成', 'Similar wording': '相似表达', 'Optimized': '优化',
+      'Apply & Fill': '采纳填入',
+      'genSample': '五年企业级前端经验，主导组件库与微前端体系落地。',
+      'genWhy': '档案中未见该字段，已依据档案与历史样例自动总结生成。',
+      'simSample': '数据可视化平台：主导图表引擎，日均 5 万次请求，渲染耗时下降 35%。',
+      'optSample': 'React / TypeScript / Vite / 微前端 / 性能优化（已控制在 60 字限制内）。',
+      'optWhy': '原内容超出字段长度限制，已截断。',
+      'Alias Learned': '别名学习', 'New Field': '新建字段', 'Profile Improved': '档案改进',
+      'currentValue': '当前档案值：', 'Update': '用页面内容更新档案',
+      'Saved to profile': '已写入档案',
+      'panelNote': '点击 × 或悬浮球可收起到球形态。',
+      'pageTitle': '资深前端工程师 — 应聘申请表',
+      'pageSub': '仿真实申请页，便于判断浮窗在真实页面中的观感。',
+      'lbl1': '姓名', 'lbl2': '手机号码', 'lbl3': '最高学历', 'lbl4': '期望岗位',
+      'rb1': '填充', 'rb2': '体检', 'rb3': '学习', 'rb4': '回写',
+      'panelTitle': '简历投递助手',
+      'stateBall': '状态：球形态（收起）—— 页面上只有球',
+      'stateRing': '状态：展开环 —— 4 个功能按钮、半透明底、无说明文字',
+      'statePanel': '状态：内容面板 —— 所选功能的白色内容/说明/操作区',
+      'hintOff': '悬浮球已关闭 —— 页面不渲染任何内容',
+    },
+  };
+
+  let lang = 'en';
+  const T = (k) => (STRINGS[lang][k] != null ? STRINGS[lang][k] : k);
+
+  const widget = document.getElementById('widget');
+  const stat = document.getElementById('stat');
+  const body = document.getElementById('body');
+  let state = 'ball';      // 'ball' | 'ring' | 'panel'
+  let currentAct = null;
+  let enabled = true;
+  let layout = 'arc';      // 'arc' (orbit the ball) | 'stack' (pill stack above the ball)
+  const ringButtons = ['rb1', 'rb2', 'rb3', 'rb4'].map((id) => document.getElementById(id));
+
+  function render() {
+    widget.classList.toggle('off', !enabled);
+    widget.classList.toggle('ring', enabled && state === 'ring');
+    widget.classList.toggle('panel', enabled && state === 'panel');
+    widget.classList.toggle('layout-stack', layout === 'stack');
+
+    // buttons live in the arc (as widget children) or inside the pill stack container
+    const holder = layout === 'stack' ? document.getElementById('stackBox') : widget;
+    for (const b of ringButtons) {
+      if (b.parentElement !== holder) holder.appendChild(b);
+    }
+    document.getElementById('btnLayout').textContent = layout === 'arc' ? 'Layout: Arc' : 'Layout: Stack';
+
+    // localized chrome
+    for (const id of ['rb1', 'rb2', 'rb3', 'rb4']) document.getElementById(id).textContent = T(id);
+    document.getElementById('panelTitle').textContent = T('panelTitle');
+    document.getElementById('panelNote').textContent = T('panelNote');
+    document.getElementById('pageTitle').textContent = T('pageTitle');
+    document.getElementById('pageSub').textContent = T('pageSub');
+    document.getElementById('lbl1').textContent = T('lbl1');
+    document.getElementById('lbl2').textContent = T('lbl2');
+    document.getElementById('lbl3').textContent = T('lbl3');
+    document.getElementById('lbl4').textContent = T('lbl4');
+    document.getElementById('btnLang').textContent = lang === 'en' ? '中文' : 'English';
+
+    if (enabled && state === 'panel' && currentAct) {
+      const c = CONTENT[currentAct];
+      document.querySelector('.cv-panel header h3').textContent = c.title[lang];
+      stat.textContent = c.stat[lang];
+      body.innerHTML = c.html();
+    } else {
+      stat.textContent = '';
+      body.innerHTML = '';
+    }
+
+    document.getElementById('stateHint').textContent = !enabled ? T('hintOff') : T(state === 'ball' ? 'stateBall' : state === 'ring' ? 'stateRing' : 'statePanel');
+  }
+
+  // Requirement 2: default = ball only. Clicking the ball opens the ring (4 buttons, no text).
+  document.getElementById('fab').addEventListener('click', () => {
+    if (!enabled) return;
+    state = state === 'ring' ? 'ball' : 'ring';
+    render();
+  });
+
+  // Requirement 4: a function button opens the white content view.
+  document.querySelectorAll('.cv-ring-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currentAct = btn.getAttribute('data-act');
+      state = 'panel';
+      render();
+    });
+  });
+
+  // Closing the content view returns to the ball (not to the ring).
+  document.getElementById('btnClose').addEventListener('click', () => {
+    state = 'ball';
+    render();
+  });
+
+  // Requirement 1: chrome option can disable the floating ball entirely.
+  document.getElementById('setEnabled').addEventListener('change', (e) => {
+    enabled = e.target.checked;
+    if (!enabled) state = 'ball';
+    render();
+  });
+
+  document.getElementById('btnLang').addEventListener('click', () => {
+    lang = lang === 'en' ? 'zh' : 'en';
+    render();
+  });
+
+  document.getElementById('btnLayout').addEventListener('click', () => {
+    layout = layout === 'arc' ? 'stack' : 'arc';
+    render();
+  });
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    enabled = true;
+    document.getElementById('setEnabled').checked = true;
+    state = 'ball';
+    currentAct = null;
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

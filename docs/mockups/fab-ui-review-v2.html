@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CV Plugin — Floating Widget v2: three new interaction designs (review)</title>
+<style>
+  :root {
+    --cv-blue: #2b6df6;
+    --cv-text: #1f2430;
+    --cv-muted: #6b7280;
+    --cv-border: #e5e8ef;
+    --cv-ok: #1a7f37;
+    --cv-warn: #c26a00;
+    --ball-alpha: .14;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.6 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif; color: var(--cv-text); background: #eef1f6; }
+
+  /* ── review toolbar ── */
+  .review-bar { position: sticky; top: 0; z-index: 90; background: #0f172a; color: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .review-bar b { font-size: 13px; }
+  .review-bar .sep { width: 1px; height: 20px; background: #334155; }
+  .review-bar label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .review-bar button { background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 7px; padding: 5px 10px; font-size: 13px; cursor: pointer; }
+  .review-bar button.on { background: var(--cv-blue); border-color: var(--cv-blue); }
+  .review-bar input[type=range] { width: 110px; }
+  .review-bar .hint { font-size: 12px; color: #94a3b8; margin-left: auto; }
+
+  /* ── page ── */
+  .page { max-width: 820px; margin: 26px auto 200px; padding: 26px 30px; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+  .page h1 { font-size: 20px; margin: 0 0 4px; }
+  .page .sub { color: var(--cv-muted); font-size: 13px; margin-bottom: 18px; }
+  .field { margin: 14px 0; }
+  .field label { display: block; font-size: 13px; color: #475467; margin-bottom: 6px; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--cv-border); border-radius: 7px; }
+
+  /* ── common widget frame ── */
+  .cv-widget { position: fixed; right: 24px; bottom: 24px; z-index: 60; }
+  .cv-widget.off { display: none; }
+  .cv-fab {
+    width: 56px; height: 56px; border-radius: 50%; cursor: pointer;
+    background: rgba(43,109,246,var(--ball-alpha));
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(43,109,246,.55);
+    color: var(--cv-blue); font-weight: 700; font-size: 15px;
+    box-shadow: 0 4px 14px rgba(43,109,246,.18);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 4;
+    transition: transform .16s ease, background .16s ease, box-shadow .16s ease;
+  }
+  .cv-fab:hover { transform: translateY(-2px); background: rgba(43,109,246,.28); }
+
+  /* ── design 1: 2×2 frosted grid card that morphs into the panel ── */
+  .grid-card {
+    position: absolute; right: 0; bottom: 68px; width: 168px;
+    padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    background: rgba(255,255,255,.42);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.8); border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(16,24,40,.16);
+    transform-origin: bottom right; transform: scale(.88); opacity: 0; pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .cv-widget[data-design="grid"][data-state="ring"] .grid-card { opacity: 1; transform: scale(1); pointer-events: auto; }
+  .grid-chip {
+    height: 62px; border-radius: 12px; border: 1px solid rgba(43,109,246,.22);
+    background: rgba(255,255,255,.92); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    color: var(--cv-blue); font-size: 11.5px; font-weight: 600;
+    transition: transform .14s ease, background .14s ease, color .14s ease;
+  }
+  .grid-chip svg { width: 20px; height: 20px; }
+  .grid-chip:hover { background: var(--cv-blue); color: #fff; transform: translateY(-1px); }
+
+  /* ── design 2: dock bar left of the ball ── */
+  .dock {
+    position: absolute; right: 68px; bottom: 0; height: 56px; padding: 6px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.42);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.8); border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(16,24,40,.16);
+    transform-origin: right center; transform: scaleX(.8); opacity: 0; pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .cv-widget[data-design="dock"][data-state="ring"] .dock { opacity: 1; transform: scaleX(1); pointer-events: auto; }
+  .dock-chip {
+    width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(43,109,246,.22);
+    background: rgba(255,255,255,.94); color: var(--cv-blue); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .14s ease, background .14s ease, color .14s ease;
+  }
+  .dock-chip svg { width: 20px; height: 20px; }
+  .dock-chip:hover { background: var(--cv-blue); color: #fff; transform: translateY(-2px); }
+
+  /* ── design 3: dial over a dimming scrim ── */
+  .scrim {
+    position: fixed; inset: 0; background: rgba(15,23,42,.22);
+    opacity: 0; pointer-events: none; transition: opacity .18s ease; z-index: 55;
+  }
+  .cv-widget[data-design="dial"][data-state="ring"] ~ .scrim,
+  .cv-widget[data-design="dial"][data-state="panel"] ~ .scrim { opacity: 1; pointer-events: auto; }
+  .dial-btn {
+    position: absolute; width: 52px; height: 52px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.85); background: rgba(255,255,255,.95);
+    color: var(--cv-blue); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    box-shadow: 0 8px 22px rgba(16,24,40,.20);
+    font-size: 10px; font-weight: 600;
+    opacity: 0; visibility: hidden; transform: scale(.7);
+    transition: opacity .18s ease, transform .18s ease, background .14s ease, color .14s ease;
+    z-index: 58;
+  }
+  .dial-btn svg { width: 18px; height: 18px; }
+  .dial-btn:hover { background: var(--cv-blue); color: #fff; }
+  .cv-widget[data-design="dial"][data-state="ring"] .dial-btn { opacity: 1; visibility: visible; transform: scale(1); }
+  /* radius 152px around the ball centre, quarter arc up-left; adjacent bounding boxes stay disjoint */
+  .dial-btn.p1 { right: 2px;   bottom: 154px; }
+  .dial-btn.p2 { right: 78px;  bottom: 134px; }
+  .dial-btn.p3 { right: 134px; bottom: 78px;  }
+  .dial-btn.p4 { right: 154px; bottom: 2px;   }
+
+  /* ── white content panel (all designs) ── */
+  .cv-panel {
+    position: fixed; right: 24px; bottom: 92px; width: 380px; max-height: 66vh;
+    background: #fff; border: 1px solid var(--cv-border); border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(16,24,40,.24);
+    display: none; flex-direction: column; overflow: hidden; z-index: 70;
+  }
+  .cv-widget[data-state="panel"] .cv-panel { display: flex; }
+  /* dial: the panel becomes a centred focus sheet */
+  .cv-widget[data-design="dial"][data-state="panel"] .cv-panel {
+    right: auto; bottom: auto; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(560px, 92vw); max-height: 74vh;
+  }
+  .cv-panel header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--cv-border); }
+  .cv-panel header h3 { margin: 0; font-size: 14px; flex: 1; }
+  .cv-panel header button { border: none; background: #f2f4f7; color: #475467; height: 26px; min-width: 26px; border-radius: 7px; cursor: pointer; font-size: 14px; }
+  .cv-panel header button:hover { background: #e4e7ec; }
+  .cv-stat { padding: 10px 14px; font-size: 12px; color: var(--cv-muted); background: #fafbfc; border-bottom: 1px solid var(--cv-border); }
+  .cv-body { padding: 8px 14px 14px; overflow: auto; }
+  .cv-item { padding: 10px 0; border-bottom: 1px dashed #eef0f5; font-size: 13px; }
+  .cv-item:last-child { border-bottom: none; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-right: 6px; background: #e8f0ff; color: var(--cv-blue); }
+  .tag.ok { background: #e6f7ec; color: var(--cv-ok); }
+  .tag.warn { background: #fff3e0; color: var(--cv-warn); }
+  .why { color: var(--cv-muted); font-size: 12px; margin-top: 3px; }
+  .content { margin: 5px 0; padding: 8px 10px; background: #f8fafc; border-radius: 7px; color: #344054; }
+  .cv-item button { margin-top: 6px; padding: 5px 10px; font-size: 12px; border-radius: 7px; border: 1px solid var(--cv-border); background: #fff; cursor: pointer; }
+  .cv-item button:hover { border-color: var(--cv-blue); color: var(--cv-blue); }
+  .cv-batch-row select { width: 100%; padding: 5px 6px; margin: 4px 0; border: 1px solid var(--cv-border); border-radius: 7px; font-size: 12px; }
+  .legend { max-width: 820px; margin: 0 auto 40px; padding: 14px 18px; background: #fff; border-left: 3px solid var(--cv-blue); border-radius: 8px; font-size: 13px; color: #475467; }
+  .legend b { color: var(--cv-text); }
+</style>
+</head>
+<body>
+
+<div class="review-bar">
+  <b>PROTOTYPE v2 — pick a design</b>
+  <span class="sep"></span>
+  <button id="dGrid" class="on">① Grid card</button>
+  <button id="dDock">② Dock bar</button>
+  <button id="dDial">③ Dial + scrim</button>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="setEnabled" checked /> ball enabled</label>
+  <label>ball opacity <input type="range" id="alpha" min="4" max="60" value="14" /></label>
+  <button id="btnLang">中文</button>
+  <button id="btnReset">Reset</button>
+  <span class="hint" id="stateHint"></span>
+</div>
+
+<main class="page">
+  <h1 id="pageTitle">Senior Frontend Engineer — Application Form</h1>
+  <div class="sub" id="pageSub">A real-looking page, so you can judge each design in context.</div>
+  <div class="field"><label id="lbl1">Full name</label><input value="Zhang San" /></div>
+  <div class="field"><label id="lbl2">Mobile</label><input value="138 0000 0000" /></div>
+  <div class="field"><label id="lbl3">Highest education</label><select><option>Bachelor</option><option selected>Master</option><option>PhD</option></select></div>
+  <div class="field"><label id="lbl4">Expected position</label><input value="Senior Frontend Architect" /></div>
+</main>
+
+<div class="legend" id="legend"></div>
+
+<!-- widget: all three designs share the ball + white panel -->
+<div class="cv-widget" id="widget" data-design="grid" data-state="ball">
+  <div class="grid-card" id="gridCard">
+    <button class="grid-chip" data-act="fill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></svg><span data-k="rb1">Fill</span></button>
+    <button class="grid-chip" data-act="review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5h6M9 3h6v3H9zM6 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1"/><path d="M8 13l2.5 2.5L16 11"/></svg><span data-k="rb2">Check</span></button>
+    <button class="grid-chip" data-act="study"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4l9 4.5-9 4.5-9-4.5L12 4z"/><path d="M6 11v4.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V11"/></svg><span data-k="rb3">Learn</span></button>
+    <button class="grid-chip" data-act="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></svg><span data-k="rb4">Save</span></button>
+  </div>
+
+  <div class="dock" id="dockBox">
+    <button class="dock-chip" data-act="fill" title="Fill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></svg></button>
+    <button class="dock-chip" data-act="review" title="Check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5h6M9 3h6v3H9zM6 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1"/><path d="M8 13l2.5 2.5L16 11"/></svg></button>
+    <button class="dock-chip" data-act="study" title="Learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4l9 4.5-9 4.5-9-4.5L12 4z"/><path d="M6 11v4.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V11"/></svg></button>
+    <button class="dock-chip" data-act="learn" title="Save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></svg></button>
+  </div>
+
+  <button class="dial-btn p1" data-act="fill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></svg><span data-k="rb1">Fill</span></button>
+  <button class="dial-btn p2" data-act="review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5h6M9 3h6v3H9zM6 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1"/><path d="M8 13l2.5 2.5L16 11"/></svg><span data-k="rb2">Check</span></button>
+  <button class="dial-btn p3" data-act="study"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4l9 4.5-9 4.5-9-4.5L12 4z"/><path d="M6 11v4.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V11"/></svg><span data-k="rb3">Learn</span></button>
+  <button class="dial-btn p4" data-act="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></svg><span data-k="rb4">Save</span></button>
+
+  <button class="cv-fab" id="fab">CV</button>
+
+  <div class="cv-panel" id="panel">
+    <header>
+      <button id="btnBack" title="Back">‹</button>
+      <h3 id="panelTitle">Resume Assistant</h3>
+      <button id="btnClose" title="Close">×</button>
+    </header>
+    <div class="cv-stat" id="stat"></div>
+    <div class="cv-body" id="body"></div>
+  </div>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONTENT = {
+    fill: {
+      title: { en: 'One-click fill', zh: '一键填充' },
+      stat: { en: 'Scanned 26 fields · Matched 21 · Auto-filled 12 · Needs Review 6 · Unrecognized 5', zh: '扫描 26 个字段 · 匹配 21 · 自动填充 12 · 待确认 6 · 未识别 5' },
+      html: () => `
+        <div class="cv-item"><span class="tag ok">${T('Filled')}</span><b>姓名</b> → 张三</div>
+        <div class="cv-item"><span class="tag ok">${T('Filled')}</span><b>手机号码</b> → 13800000000</div>
+        <div class="cv-item"><span class="tag ok">${T('Filled')}</span><b>意向岗位</b> → 资深前端架构师</div>
+        <div class="cv-item"><span class="tag warn">${T('Needs Review')}</span><b>毕业院校及所学专业</b><div class="why">${T('whyComposite')}</div></div>
+        <div class="cv-item"><span class="tag warn">${T('Needs Review')}</span><b>${T('batchTitle')}</b>
+          <div class="cv-batch-row"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" checked /> <b>最近一次工作经验</b></label>
+            <select><option>工作经历</option><option>项目经历</option><option value="">${T('ignoreOption')}</option></select>
+            <div class="why">${T('batchWhy')}</div></div>
+          <div class="cv-batch-row"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" checked /> <b>所获证书</b></label>
+            <select><option>证书</option><option>其他</option><option value="">${T('ignoreOption')}</option></select>
+            <div class="why">${T('batchWhy2')}</div></div>
+          <div style="margin-top:8px"><button>${T('Apply Selected')}</button> <button>${T('Ignore All')}</button></div>
+        </div>`,
+    },
+    review: {
+      title: { en: 'Resume check', zh: '简历体检' },
+      stat: { en: 'Fields 26 · Auto-matched 12 · Needs Review 6 · Unseen 5 · Suggestions 4', zh: '字段 26 · 自动匹配 12 · 待确认 6 · 未见 5 · 建议 4' },
+      html: () => `
+        <div class="cv-item"><span class="tag">${T('Generated')}</span><b>自我评价</b>
+          <div class="content">${T('genSample')}</div><div class="why">${T('genWhy')}</div><button>${T('Apply & Fill')}</button></div>
+        <div class="cv-item"><span class="tag">${T('Similar')}</span><b>项目经历</b>
+          <div class="content">${T('simSample')}</div><button>${T('Apply & Fill')}</button></div>
+        <div class="cv-item"><span class="tag warn">${T('Optimized')} · length</span><b>技能特长</b>
+          <div class="content">${T('optSample')}</div><div class="why">${T('optWhy')}</div><button>${T('Apply & Fill')}</button></div>`,
+    },
+    study: {
+      title: { en: 'Sample learning', zh: '样例学习' },
+      stat: { en: 'Filled 12 items · Aliases learned 3 · Similar merged 2 · Fields created 1 · Samples 4', zh: '已填 12 项 · 学到别名 3 · 相似归并 2 · 新建字段 1 · 样例 4' },
+      html: () => `
+        <div class="cv-item"><span class="tag ok">${T('Alias')}</span><b>期望工作城市</b> → desiredCity</div>
+        <div class="cv-item"><span class="tag ok">${T('NewField')}</span><b>获奖经历</b><div class="content">2023 年度优秀员工</div></div>
+        <div class="cv-item"><span class="tag ok">${T('Improved')}</span><b>自我评价</b> → selfIntro<div class="content">${T('genSample')}</div></div>`,
+    },
+    learn: {
+      title: { en: 'Learn from this page', zh: '从本页学习' },
+      stat: { en: 'Found 8 fields to write back · 6 written', zh: '发现 8 个可回写字段 · 已回写 6 个' },
+      html: () => `
+        <div class="cv-item"><b>期望薪资</b>: 35-45K<div class="why">${T('current')} 30-40K</div><button>${T('Update')}</button></div>
+        <div class="cv-item"><b>到岗时间</b>: 一个月内<div class="why">${T('current')} （空）</div><button>${T('Update')}</button></div>`,
+    },
+  };
+
+  const STRINGS = {
+    en: {
+      rb1: 'Fill', rb2: 'Check', rb3: 'Learn', rb4: 'Save',
+      panelTitle: 'Resume Assistant',
+      Filled: 'Filled', 'Needs Review': 'Needs Review',
+      batchTitle: '2 low-confidence fields (confirm or ignore in batch)',
+      ignoreOption: '— Ignore this item (do not suggest again) —',
+      batchWhy: 'Page value: 5 年 → Suggested: 5 years of experience',
+      batchWhy2: 'Page value: CET-6 → Suggested: 大学英语六级',
+      'Apply Selected': 'Apply Selected', 'Ignore All': 'Ignore All',
+      whyComposite: 'Composite field — please split manually',
+      Generated: 'Generated', Similar: 'Similar wording', Optimized: 'Optimized',
+      'Apply & Fill': 'Apply & Fill',
+      genSample: 'Five years of enterprise frontend experience; led the component library and micro-frontend rollout.',
+      genWhy: 'Not found in the profile — summarized from your profile and past samples.',
+      simSample: 'Data visualization platform: led the charting engine, 50k requests/day, render time down 35%.',
+      optSample: 'React / TypeScript / Vite / micro-frontend / performance tuning (within the 60-character limit).',
+      optWhy: 'Original exceeded the field limit and was truncated.',
+      Alias: 'Alias Learned', NewField: 'New Field', Improved: 'Profile Improved',
+      current: 'Current profile value:', Update: 'Update Profile With Profile Content'.replace('Profile Content', 'Page Content'),
+      pageTitle: 'Senior Frontend Engineer — Application Form',
+      pageSub: 'A real-looking page, so you can judge each design in context.',
+      lbl1: 'Full name', lbl2: 'Mobile', lbl3: 'Highest education', lbl4: 'Expected position',
+      legend: '<b>Three new interaction designs — pick one (or mix):</b><br />① <b>Grid card</b>: the ball opens a frosted 2×2 icon card in place; choosing a function morphs that same card into the white content panel (no jump, one anchor point).<br />② <b>Dock bar</b>: the ball opens a frosted pill bar to its left (icons only, tooltips on hover); the white panel rises above the bar.<br />③ <b>Dial + scrim</b>: the ball opens 4 icon buttons on a dial around it while the page dims; choosing a function opens the white panel as a centred focus sheet.<br />All three: ball is the default state (nothing else on screen), no description text in the button layer, panel background is opaque white, click outside / × collapses back to the ball.',
+      hint: { ball: 'state: ball (default) — only the ball is visible', ring: 'state: function layer — 4 buttons, translucent, no description text', panel: 'state: content — opaque white panel' },
+    },
+    zh: {
+      rb1: '填充', rb2: '体检', rb3: '学习', rb4: '回写',
+      panelTitle: '简历投递助手',
+      Filled: '已填充', 'Needs Review': '待确认',
+      batchTitle: '2 个低置信度字段（可批量确认/忽略）',
+      ignoreOption: '— 忽略此项（不再建议） —',
+      batchWhy: '页面值：5 年 → 建议填入：5 years of experience',
+      batchWhy2: '页面值：CET-6 → 建议填入：大学英语六级',
+      'Apply Selected': '应用所选项', 'Ignore All': '全部忽略',
+      whyComposite: '复合字段，建议人工拆分填写',
+      Generated: '补充生成', Similar: '相似表达', Optimized: '优化',
+      'Apply & Fill': '采纳填入',
+      genSample: '五年企业级前端经验，主导组件库与微前端体系落地。',
+      genWhy: '档案中未见该字段，已依据档案与历史样例自动总结生成。',
+      simSample: '数据可视化平台：主导图表引擎，日均 5 万次请求，渲染耗时下降 35%。',
+      optSample: 'React / TypeScript / Vite / 微前端 / 性能优化（已控制在 60 字限制内）。',
+      optWhy: '原内容超出字段长度限制，已截断。',
+      Alias: '别名学习', NewField: '新建字段', Improved: '档案改进',
+      current: '当前档案值：', Update: '用页面内容更新档案',
+      pageTitle: '资深前端工程师 — 应聘申请表',
+      pageSub: '仿真实页面，便于判断各设计在真实页面中的观感。',
+      lbl1: '姓名', lbl2: '手机号码', lbl3: '最高学历', lbl4: '期望岗位',
+      legend: '<b>三套新交互设计 —— 挑一套（也可混搭）：</b><br />① <b>宫格卡片</b>：球展开一张毛玻璃 2×2 图标卡（原位、不跳动），选功能后同一张卡就地变成白色内容面板。<br />② <b>停靠条</b>：球在左侧展开磨砂胶囊条（纯图标，悬停显示名称），白色面板从条上方升起。<br />③ <b>表盘+遮罩</b>：球周围展开 4 个图标按钮、页面同时变暗；选功能后面板以居中白卡形式聚焦展示。<br />三者共同点：默认只有球、按钮层无说明文字、内容面板纯白、点空白处或 × 收回球形态。',
+      hint: { ball: '状态：球形态（默认）—— 页面上只有球', ring: '状态：功能层 —— 4 个按钮、半透明、无说明文字', panel: '状态：内容 —— 不透明白色面板' },
+    },
+  };
+
+  let lang = 'en';
+  let design = 'grid';
+  let state = 'ball';
+  let enabled = true;
+  let currentAct = null;
+  const T = (k) => (STRINGS[lang][k] != null ? STRINGS[lang][k] : k);
+
+  const widget = document.getElementById('widget');
+  const stat = document.getElementById('stat');
+  const body = document.getElementById('body');
+
+  function render() {
+    widget.dataset.design = design;
+    widget.dataset.state = enabled ? state : 'ball';
+    widget.classList.toggle('off', !enabled);
+    document.documentElement.style.setProperty('--ball-alpha', (document.getElementById('alpha').value / 100).toFixed(2));
+
+    document.querySelectorAll('[data-k]').forEach((el) => { el.textContent = T(el.dataset.k); });
+    document.getElementById('pageTitle').textContent = T('pageTitle');
+    document.getElementById('pageSub').textContent = T('pageSub');
+    document.getElementById('lbl1').textContent = T('lbl1');
+    document.getElementById('lbl2').textContent = T('lbl2');
+    document.getElementById('lbl3').textContent = T('lbl3');
+    document.getElementById('lbl4').textContent = T('lbl4');
+    document.getElementById('legend').innerHTML = T('legend');
+    document.getElementById('btnLang').textContent = lang === 'en' ? '中文' : 'English';
+    document.getElementById('dGrid').classList.toggle('on', design === 'grid');
+    document.getElementById('dDock').classList.toggle('on', design === 'dock');
+    document.getElementById('dDial').classList.toggle('on', design === 'dial');
+
+    if (enabled && state === 'panel' && currentAct) {
+      const c = CONTENT[currentAct];
+      document.getElementById('panelTitle').textContent = c.title[lang];
+      stat.textContent = c.stat[lang];
+      body.innerHTML = c.html();
+    } else {
+      stat.textContent = '';
+      body.innerHTML = '';
+    }
+    document.getElementById('stateHint').textContent = !enabled ? 'ball disabled — nothing rendered' : T('hint')[state];
+  }
+
+  // ball: default state. Click toggles the function layer.
+  document.getElementById('fab').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!enabled) return;
+    state = state === 'ring' ? 'ball' : 'ring';
+    render();
+  });
+
+  // function buttons (all three designs)
+  document.querySelectorAll('[data-act]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!enabled) return;
+      currentAct = btn.getAttribute('data-act');
+      state = 'panel';
+      render();
+    });
+  });
+
+  // panel: back to the function layer, or all the way back to the ball
+  document.getElementById('btnBack').addEventListener('click', (e) => {
+    e.stopPropagation();
+    state = 'ring';
+    render();
+  });
+  document.getElementById('btnClose').addEventListener('click', (e) => {
+    e.stopPropagation();
+    state = 'ball';
+    render();
+  });
+
+  // click outside collapses to the ball (page, scrim, panel padding)
+  document.addEventListener('click', (e) => {
+    if (!enabled || state === 'ball') return;
+    if (e.target.closest('#widget')) return;
+    state = 'ball';
+    render();
+  });
+  document.getElementById('scrim').addEventListener('click', () => {
+    state = 'ball';
+    render();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state !== 'ball') {
+      state = state === 'panel' ? 'ring' : 'ball';
+      render();
+    }
+  });
+
+  document.getElementById('setEnabled').addEventListener('change', (e) => {
+    enabled = e.target.checked;
+    if (!enabled) state = 'ball';
+    render();
+  });
+  document.getElementById('alpha').addEventListener('input', render);
+  document.getElementById('dGrid').addEventListener('click', () => { design = 'grid'; render(); });
+  document.getElementById('dDock').addEventListener('click', () => { design = 'dock'; render(); });
+  document.getElementById('dDial').addEventListener('click', () => { design = 'dial'; render(); });
+  document.getElementById('btnLang').addEventListener('click', () => { lang = lang === 'en' ? 'zh' : 'en'; render(); });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    enabled = true; document.getElementById('setEnabled').checked = true;
+    state = 'ball'; currentAct = null; design = 'grid';
+    document.getElementById('alpha').value = 14;
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>应聘登记表 - 北森布局（真实表单复刻）</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; background: #f7f8fa; margin: 0; }
+    .wrap { max-width: 860px; margin: 24px auto; background: #fff; padding: 24px 28px; border-radius: 8px; }
+    h1 { font-size: 18px; }
+    table { width: 100%; border-collapse: collapse; }
+    td { border: 1px solid #e3e6ec; padding: 8px 10px; vertical-align: middle; }
+    td.label { width: 150px; background: #fafbfd; text-align: right; color: #555; }
+    .req { color: #d33; }
+    .hint { color: #999; font-size: 12px; }
+    input[type=text], input[type=date], select { width: 90%; padding: 6px 8px; border: 1px solid #ccd3dd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>应聘登记表</h1>
+    <p class="hint">感谢你选择本职位，请认真填写以下内容，谢谢。（复刻自真实北森应聘登记表字段与表格布局）</p>
+    <table>
+      <tr>
+        <td class="label">姓名 <span class="req">*</span></td>
+        <td><input type="text" id="b_name" /></td>
+        <td class="label">性别 <span class="req">*</span></td>
+        <td>
+          <label><input type="radio" name="b_gender" value="v0" /> 男</label>
+          <label><input type="radio" name="b_gender" value="v1" /> 女</label>
+        </td>
+      </tr>
+      <tr>
+        <td class="label" rowspan="3">出生日期 <span class="req">*</span></td>
+        <td>
+          <select id="b_year"><option value="">请选择</option><option value="v1995">1995年</option><option value="v1996">1996年</option><option value="v1994">1994年</option></select>
+          <select id="b_month"><option value="">月</option><option value="v6">6月</option><option value="v1">1月</option><option value="v12">12月</option></select>
+        </td>
+        <td class="label">手机号码 <span class="req">*</span></td>
+        <td><input type="text" id="b_phone" /></td>
+      </tr>
+      <tr>
+        <td><select id="b_day"><option value="">日</option><option value="v18">18日</option><option value="v1">1日</option></select></td>
+        <td class="label">电子邮箱 <span class="req">*</span></td>
+        <td><input type="text" id="b_email" /></td>
+      </tr>
+      <tr>
+        <td><span class="hint">（请填写与证件一致的日期）</span></td>
+        <td class="label">最高学历 <span class="req">*</span></td>
+        <td>
+          <select id="b_edu">
+            <option value="">请选择</option>
+            <option value="v0">高中及以下</option>
+            <option value="v1">大专</option>
+            <option value="v2">本科</option>
+            <option value="v3">硕士及以上</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td class="label">毕业院校及所学专业 <span class="req">*</span></td>
+        <td colspan="3"><input type="text" id="b_edu_combo" /></td>
+      </tr>
+      <tr>
+        <td class="label">现单位及岗位 <span class="req">*</span></td>
+        <td colspan="3"><input type="text" id="b_job_combo" /></td>
+      </tr>
+      <tr>
+        <td class="label">住址 <span class="req">*</span></td>
+        <td colspan="3">
+          <input type="text" id="b_addr" />
+          <div class="hint">涉及个人敏感信息，请谨慎填写</div>
+        </td>
+      </tr>
+      <tr>
+        <td class="label">上传个人简历或近照 <span class="req">*</span></td>
+        <td colspan="3"><input type="file" id="b_resume" /></td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

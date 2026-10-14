@@ -1,0 +1,28 @@
+# CV Plugin — Dependency Manifest
+# ==============================================
+# This project has ZERO third-party runtime dependencies.
+# The extension runs entirely on browser built-in APIs; the test harness runs
+# entirely on Node.js built-in modules. `npm install` is NOT required.
+# ==============================================
+
+# ---------- Runtime (browser extension) ----------
+# No packages. Browser platform APIs used (all built into Chrome/Edge 110+):
+#   chrome.storage / chrome.runtime / chrome.tabs   (MV3 extension APIs)
+#   Fetch, Streams, DecompressionStream             (PDF text extraction)
+#   File System Access API                          (local folder auto-backup)
+#   IndexedDB                                       (backup folder handle)
+#   File / FileReader / Blob                        (import & screenshots)
+
+# ---------- Development & test harness ----------
+# Node.js >= 20 (engines enforced in package.json)
+# Built-in modules used (no external packages):
+#   node:test, node:assert/strict      — test runner & assertions
+#   node:fs, node:path, node:url       — file & path handling
+#   node:os, node:http                 — temp dirs & local fixture server
+#   node:child_process                 — launching the local browser
+#   node:timers/promises               — async waits
+#   node:zlib                          — icon & test-PDF generation
+#
+# Optional (NOT required to install):
+#   Chrome / Edge / Chromium >= 110    — target browser for e2e & live tests
+#   A real LLM/VLM endpoint            — only for `npm run test:llm` (user-provided via env vars)

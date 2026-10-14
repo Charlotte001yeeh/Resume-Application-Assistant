@@ -1,0 +1,22 @@
+{
+  "name": "cv-plugin",
+  "version": "1.1.0",
+  "private": true,
+  "description": "CV Plugin - Resume Application Assistant (Chrome/Edge MV3): local resume profile, semantic form auto-fill, review & learning from completed applications",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/unit/*.test.mjs\"",
+    "test:e2e": "node test/e2e/run-e2e.mjs",
+    "test:e2e:headless": "node test/e2e/run-e2e.mjs --headless",
+    "test:live": "node test/e2e/live-sites.mjs",
+    "test:all": "npm test && npm run test:e2e",
+    "test:llm": "node test/llm/live-smoke.mjs",
+    "scan": "node scripts/sensitive-scan.mjs",
+    "mock": "node scripts/serve-mock.mjs 8899",
+    "icons": "node scripts/gen-icons.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

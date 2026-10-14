@@ -1,0 +1,31 @@
+/* Debug: dump the fill report details for cascade-form */
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { startServer } from './server.mjs';
+import { launchChrome, loadUnpacked, Cdp, evaluate, bridge, waitFor, navigate } from './cdp.mjs';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(HERE, '..', '..');
+const { baseUrl } = await startServer(join(HERE, 'fixtures'));
+const userDataDir = mkdtempSync(join(tmpdir(), 'cv-dbg3-'));
+const { proc, endpoint } = await launchChrome({ extensionPath: join(ROOT, 'extension'), userDataDir });
+const cdp = new Cdp(endpoint.webSocketDebuggerUrl);
+await cdp.connect();
+await loadUnpacked(cdp, join(ROOT, 'extension'));
+const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank' });
+const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
+await cdp.send('Page.enable', {}, sessionId);
+await cdp.send('Runtime.enable', {}, sessionId);
+await navigate(cdp, sessionId, `${baseUrl}/cascade-form.html`);
+await waitFor(cdp, sessionId, `document.documentElement.dataset.cvReady === '1'`);
+const scan = await bridge(cdp, sessionId, 'scan');
+console.log('SCAN:');
+for (const f of scan.fields) console.log(`  ${f.id.padEnd(12)} kind=${f.kind} label="${f.label}" cellLabel="${f.cellLabel}" opts=${JSON.stringify(f.options)}`);
+const report = await bridge(cdp, sessionId, 'fill');
+console.log('FILL RESULTS:');
+for (const r of report.results) console.log(`  ok=${r.ok} value="${r.value}" label="${r.label}" field=${r.fieldKey} warn=${JSON.stringify(r.warnings)}`);
+const vals = await evaluate(cdp, sessionId, `JSON.stringify({p: document.getElementById('ca_province').value, c: document.getElementById('ca_city').value, d: document.getElementById('ca_district').value, pOpts: [...document.getElementById('ca_province').options].map(o=>o.value), cOpts: [...document.getElementById('ca_city').options].map(o=>o.value)})`);
+console.log('DOM:', vals);
+process.exit(0);

@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "CV Plugin - Resume Application Assistant",
+  "version": "1.1.0",
+  "description": "Long-term resume profile storage; semantic field detection and auto-fill on online application pages; resume check: content generation for unseen fields, similar-field phrasing, and optimization of existing content.",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "ui/popup.html",
+    "default_title": "CV Plugin - Resume Application Assistant"
+  },
+  "options_page": "ui/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_idle",
+      "js": [
+        "src/core/util.js",
+        "src/core/schema.js",
+        "src/core/lexicon.js",
+        "src/core/store.js",
+        "src/core/matcher.js",
+        "src/core/fill.js",
+        "src/core/optimizer.js",
+        "src/core/llm.js",
+        "src/core/pdf.js",
+        "src/core/table-layout.js",
+        "src/core/confirm-batch.js",
+        "src/core/fact-check.js",
+        "src/core/cascade.js",
+        "src/core/i18n.js",
+        "src/content/content.js"
+      ]
+    }
+  ]
+}

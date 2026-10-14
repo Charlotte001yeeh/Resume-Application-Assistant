@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>级联联动 - 省市区（含点击下拉级联）</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; background: #f6f7f9; margin: 0; }
+    .wrap { max-width: 820px; margin: 24px auto; background: #fff; padding: 24px 30px; border-radius: 8px; }
+    .form-row { display: flex; align-items: center; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+    .form-row label { width: 80px; text-align: right; color: #555; }
+    select, input { padding: 8px 10px; border: 1px solid #ccd3dd; border-radius: 4px; min-width: 150px; }
+    .select-box { position: relative; }
+    .dropdown-menu { position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #ccd3dd; margin: 2px 0 0; padding: 0; list-style: none; min-width: 160px; display: none; z-index: 5; }
+    .dropdown-menu li { padding: 7px 12px; cursor: pointer; }
+    .dropdown-menu li:hover { background: #eef3ff; }
+    .hint { color: #999; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>期望工作地点（级联联动）</h1>
+    <p class="hint">省 → 市（异步加载选项）→ 区县（点击下拉，异步菜单）。档案地址：北京市海淀区示例路街 27 号。</p>
+    <div class="form-row">
+      <label for="ca_province">省份</label>
+      <select id="ca_province"><option value="">请选择省份</option></select>
+      <label for="ca_city">城市</label>
+      <select id="ca_city"><option value="">请选择城市</option></select>
+      <label for="ca_district">区县</label>
+      <div class="select-box">
+        <input type="text" id="ca_district" class="select-input" readonly value="" />
+        <ul class="dropdown-menu" id="menu_district"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {
+      '北京市': { cities: ['北京市'], districts: { '北京市': ['海淀区', '朝阳区', '西城区'] } },
+      '河北省': { cities: ['石家庄市', '保定市'], districts: { '石家庄市': ['长安区', '桥西区'] } },
+      '广东省': { cities: ['广州市', '深圳市'], districts: { '广州市': ['天河区', '越秀区'] } },
+    };
+    // province options: simulated async API load
+    setTimeout(() => {
+      const p = document.getElementById('ca_province');
+      Object.keys(DATA).forEach((k) => p.add(new Option(k, k)));
+    }, 30);
+    // province -> city: fill options asynchronously (80ms)
+    document.getElementById('ca_province').addEventListener('change', function () {
+      const city = document.getElementById('ca_city');
+      city.innerHTML = '<option value="">请选择城市</option>';
+      setTimeout(() => {
+        ((DATA[this.value] || {}).cities || []).forEach((k) => city.add(new Option(k, k)));
+      }, 80);
+    });
+    // city -> district: click-to-open dropdown + async menu (80ms)
+    const district = document.getElementById('ca_district');
+    const menu = document.getElementById('menu_district');
+    document.getElementById('ca_city').addEventListener('change', function () {
+      menu.innerHTML = '';
+      setTimeout(() => {
+        const province = document.getElementById('ca_province').value;
+        (((DATA[province] || {}).districts || {})[this.value] || []).forEach((k) => {
+          const li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          li.textContent = k;
+          li.onclick = () => {
+            district.value = k;
+            menu.style.display = 'none';
+            district.dispatchEvent(new Event('input', { bubbles: true }));
+            district.dispatchEvent(new Event('change', { bubbles: true }));
+          };
+          menu.appendChild(li);
+        });
+      }, 80);
+    });
+    district.addEventListener('click', () => {
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
+  </script>
+</body>
+</html>

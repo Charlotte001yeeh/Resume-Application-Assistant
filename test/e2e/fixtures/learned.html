@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>星辰智能 - 新的申请表（学习后）</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; margin: 0; background: #f5f7fa; color: #222; }
+    .wrap { max-width: 760px; margin: 24px auto; background: #fff; border-radius: 10px; padding: 28px 36px; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
+    h1 { font-size: 20px; border-bottom: 2px solid #7b3fe4; padding-bottom: 10px; }
+    .row { margin: 14px 0; }
+    label { display: block; margin-bottom: 4px; color: #555; }
+    input, textarea { width: 100%; padding: 8px 10px; border: 1px solid #cfd6e0; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    textarea { min-height: 88px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>算法平台工程师 · 申请表</h1>
+
+    <div class="row">
+      <label for="callname">怎么称呼你</label>
+      <input type="text" id="callname" data-state="callname" />
+    </div>
+    <div class="row">
+      <label for="joinreason">为什么想加入我们公司</label>
+      <textarea id="joinreason" name="joinreason" data-state="joinreason"></textarea>
+    </div>
+    <div class="row">
+      <label for="proudstory">请分享一次让你自豪的技术攻坚经历</label>
+      <textarea id="proudstory" name="proudstory" data-state="proudstory"></textarea>
+    </div>
+    <div class="row">
+      <label for="direction">你为什么想从事这个方向</label>
+      <textarea id="direction" name="direction" data-state="direction"></textarea>
+    </div>
+  </div>
+</body>
+</html>

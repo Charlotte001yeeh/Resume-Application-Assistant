@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<!-- CV Plugin — options.html: resume profile manager (edit fields, multi-profile, import, backup). -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resume Profile Manager - CV Plugin</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>Resume Profile Manager <span class="badge" id="fieldBadge">0</span></h1>
+    <div class="muted">Your profile is stored locally in the browser (chrome.storage.local) and can be edited anytime; it powers semantic auto-fill on online application forms and resume checks.</div>
+    <div class="toolbar">
+      <button class="primary" id="btnSave">Save All Changes</button>
+      <button id="btnSample">Load Sample Profile</button>
+      <button id="btnExport">Export JSON</button>
+      <button id="btnExportMasked">Export (Masked)</button>
+      <button id="btnImport">Import (PDF / Image / JSON)</button>
+      <input type="file" id="fileImport" accept=".pdf,.png,.jpg,.jpeg,.txt,.json,application/pdf,image/*,application/json" style="display:none" />
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">How to Use</h2>
+    <ol class="muted" style="margin:6px 0 0; padding-left:20px">
+      <li>Fill in / update key resume fields here (auto-saved).</li>
+      <li>Open any job application page and click the <b>CV</b> button at the bottom right → "One-click Fill"; the plugin detects semantically matching fields and fills them in.</li>
+      <li>Click "Resume Check": auto-generate summaries for unseen fields, suggest similar field phrasings, and optimize the content you already filled in.</li>
+      <li>Click "Learn from This Page": write back what you typed on the page into your profile to keep it up to date.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Multiple Profiles (for different companies / scenarios)</h2>
+    <div class="muted">
+      Each profile is fully independent (its own fields, custom fields, and learning data): <b>whichever profile is active is the one used for fill / check / sample learning</b>.
+      Useful for preparing different wording per company or role. When importing JSON you can choose "Merge into current" or "Create as a separate profile".
+    </div>
+    <div class="toolbar">
+      <button id="btnNewProfile">New Blank Profile</button>
+      <button id="btnCloneProfile">Copy from Current</button>
+    </div>
+    <div id="profileList"></div>
+    <div class="row" style="margin-top:12px">
+      <label for="importMode" class="muted">Import mode</label>
+      <select id="importMode" style="max-width:220px">
+        <option value="merge">Merge into current profile</option>
+        <option value="new">Create as a separate profile</option>
+      </select>
+      <span class="muted">(Works with the "Import" button in the toolbar above; applies to PDF/image/JSON)</span>
+    </div>
+    <div id="importPreview"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Data Safety &amp; Backup (prevent data loss)</h2>
+    <div class="muted">
+      Resume data is stored in browser extension storage: <b>closing the browser, restarting your PC, or clearing browsing data (cache/cookies) will NOT lose it</b>;
+      but <b>uninstalling the extension, deleting the browser user profile, or reinstalling the OS / switching computers without migration</b> will.
+      Recommended: enable "Auto backup to local folder" — backups are saved in a folder you choose (independent of browser storage), survive extension removal, and can be restored in one click after reinstalling.
+    </div>
+    <div class="toolbar">
+      <button class="primary" id="btnAutoBackup">Choose Backup Folder &amp; Enable Auto Backup</button>
+      <button id="btnBackupNow">Backup Now</button>
+      <button id="btnAutoBackupOff">Disable Auto Backup</button>
+    </div>
+    <div class="muted" id="backupStatus">Auto backup: Off</div>
+    <div class="toolbar">
+      <button id="btnExportAll">Download Full Backup (all profiles + learning data + settings)</button>
+      <button id="btnRestoreAll">Restore from Full Backup</button>
+      <input type="file" id="fileRestore" accept=".json,application/json" style="display:none" />
+    </div>
+  </div>
+
+  <div id="profileEditor"></div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Custom Fields</h2>
+    <div class="muted">Fields beyond the built-in template (e.g. "Competition Award") can be added and take part in semantic matching.</div>
+    <div class="row" style="margin:10px 0">
+      <input type="text" id="customLabel" placeholder="Field name, e.g. Competition Award" style="max-width:220px" />
+      <select id="customCategory" style="max-width:140px"></select>
+      <input type="text" id="customValue" placeholder="Content" style="max-width:260px" />
+      <button class="primary" id="btnAddCustom">Add Field</button>
+    </div>
+    <div id="customList"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Learning Data (sample learning)</h2>
+    <div class="muted">Learned from fully completed application pages: <b>field aliases</b> make same-meaning fields match more accurately over time; <b>hand-written samples</b> let auto-generation for unseen fields prefer your own wording (the more you use it, the better it gets).</div>
+    <div class="row" style="margin:10px 0">
+      <button id="btnClearLearning" class="danger">Clear Learning Data</button>
+    </div>
+    <h3>Learned Field Aliases</h3>
+    <div id="learningAliases"></div>
+    <h3>Hand-Written Samples (generation reference)</h3>
+    <div id="learningSamples"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Settings</h2>
+    <div class="row" style="margin:0 0 10px">
+      <span class="muted">UI language</span>
+      <select id="setLang" style="max-width:180px">
+        <option value="auto">Auto (follow browser)</option>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+    <div class="switch"><input type="checkbox" id="setAutoFill" /><label for="setAutoFill">Allow auto-fill of high-confidence fields when an application page opens</label></div>
+    <div class="switch"><input type="checkbox" id="setFab" /><label for="setFab">Show the floating button (CV assistant) on pages</label></div>
+    <h3>Site Scope</h3>
+    <div class="row">
+      <select id="setSiteMode" style="max-width:180px">
+        <option value="all">All websites</option>
+        <option value="whitelist">Whitelist sites only</option>
+      </select>
+      <input type="text" id="setBlocked" placeholder="Blocked sites, comma-separated, e.g. liepin.com,zhaopin.com" style="max-width:340px" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input type="text" id="setAllowed" placeholder="Whitelist sites, comma-separated, e.g. zhihipin.com,linkedin.com" style="max-width:340px" />
+    </div>
+
+    <h3>Optional: LLM content enhancement (OpenAI-compatible API, off by default)</h3>
+    <div class="switch"><input type="checkbox" id="setLlmEnabled" /><label for="setLlmEnabled">Enable LLM-generated supplemental content (falls back to offline templates on failure)</label></div>
+    <div class="switch"><input type="checkbox" id="setVlmEnabled" /><label for="setVlmEnabled">Enable VLM multimodal: recognize / proofread imported resumes (PDF text proofreading, image resume recognition)</label></div>
+    <div class="switch"><input type="checkbox" id="setVlmStudy" /><label for="setVlmStudy">Use VLM to cross-check page screenshots during sample learning (picks up filled fields missed by the DOM, corrects content)</label></div>
+    <div class="grid">
+      <div class="field"><label>Base URL</label><input type="text" id="setLlmBase" placeholder="https://api.example.com/v1" /></div>
+      <div class="field"><label>API Key</label><input type="password" id="setLlmKey" placeholder="sk-..." /></div>
+      <div class="field"><label>Model</label><input type="text" id="setLlmModel" placeholder="model-name" /></div>
+    </div>
+    <div class="toolbar">
+      <button class="primary" id="btnSaveSettings">Save Settings</button>
+    </div>
+    <div class="muted">Privacy: all profile data stays on this device; with LLM enabled, only the necessary context is sent when generating supplemental content for "Resume Check".</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../src/core/util.js"></script>
+  <script src="../src/core/schema.js"></script>
+  <script src="../src/core/lexicon.js"></script>
+  <script src="../src/core/store.js"></script>
+  <script src="../src/core/matcher.js"></script>
+  <script src="../src/core/pdf.js"></script>
+  <script src="../src/core/resume-parse.js"></script>
+  <script src="../src/core/llm.js"></script>
+  <script src="../src/core/backup.js"></script>
+  <script src="../src/core/i18n.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

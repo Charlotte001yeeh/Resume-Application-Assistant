@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shadow DOM 封装控件</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; background: #f6f7f9; margin: 0; }
+    .wrap { max-width: 820px; margin: 24px auto; background: #fff; padding: 24px 30px; border-radius: 8px; }
+    .hint { color: #999; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Shadow DOM 封装表单</h1>
+    <p class="hint">上：开放影子根（应可识别填充）；下：closed 影子根（浏览器安全边界，不可读 → 应跳过不误填）。</p>
+    <h3>开放影子根组件</h3>
+    <div id="open-host"></div>
+    <h3>closed 影子根组件</h3>
+    <div id="closed-host"></div>
+    <div class="hint" id="note"></div>
+  </div>
+
+  <script>
+    // open shadow root: input + click-to-open dropdown
+    const open = document.getElementById('open-host').attachShadow({ mode: 'open' });
+    open.innerHTML = `
+      <style>
+        .row { display: flex; gap: 10px; align-items: center; margin: 12px 0; }
+        .row label { width: 110px; text-align: right; color: #555; }
+        input { padding: 8px 10px; border: 1px solid #ccd3dd; border-radius: 4px; min-width: 220px; }
+        .select-box { position: relative; }
+        .dropdown-menu { position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #ccd3dd; margin: 2px 0 0; padding: 0; list-style: none; min-width: 180px; display: none; }
+        .dropdown-menu li { padding: 7px 12px; cursor: pointer; }
+        .dropdown-menu li:hover { background: #eef3ff; }
+      </style>
+      <div class="row">
+        <label for="s_email">电子邮箱</label>
+        <input type="text" id="s_email" />
+      </div>
+      <div class="row">
+        <label for="s_city">期望工作城市</label>
+        <div class="select-box">
+          <input type="text" id="s_city" class="select-input" readonly value="" />
+          <ul class="dropdown-menu" id="s_menu"><li role="option">北京</li><li role="option">上海</li><li role="option">广州</li></ul>
+        </div>
+      </div>`;
+    const city = open.getElementById('s_city');
+    const menu = open.getElementById('s_menu');
+    city.addEventListener('click', () => {
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
+    menu.querySelectorAll('li').forEach((li) => {
+      li.onclick = () => {
+        city.value = li.textContent.trim();
+        menu.style.display = 'none';
+        city.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+    });
+
+    // closed shadow root: not readable from the outside
+    const closed = document.getElementById('closed-host').attachShadow({ mode: 'closed' });
+    closed.innerHTML = `
+      <div class="row"><label>保密信息</label><input type="text" id="s_secret" /></div>`;
+    document.getElementById('note').textContent = 'closed 影子根内含输入框「保密信息」，内容脚本无法读取（设计如此）。';
+  </script>
+</body>
+</html>

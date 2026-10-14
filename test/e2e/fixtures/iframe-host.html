@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>iframe 多 frame 表单</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; background: #f6f7f9; margin: 0; }
+    .wrap { max-width: 900px; margin: 20px auto; background: #fff; padding: 22px 28px; border-radius: 8px; }
+    .hint { color: #999; font-size: 12px; }
+    iframe { border: 1px solid #dde2ea; border-radius: 6px; margin: 10px 0; width: 100%; height: 170px; background: #fbfcfe; }
+    label { display: inline-block; width: 110px; color: #555; }
+    input { padding: 8px 10px; border: 1px solid #ccd3dd; border-radius: 4px; width: 260px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>多 frame 申请表（主页面 + 同源 iframe + 跨源 iframe + srcdoc iframe）</h1>
+    <p class="hint">一键填充应驱动所有 frame 各自填写（含跨域 iframe），面板显示聚合统计。</p>
+
+    <h3>主页面</h3>
+    <div><label for="top_name">你的姓名</label><input type="text" id="top_name" /></div>
+    <div><label for="top_city">期望工作城市</label><input type="text" id="top_city" /></div>
+
+    <h3>同源 iframe（内嵌第三方申请表）</h3>
+    <iframe id="f1" src="frame-form.html"></iframe>
+
+    <h3>跨源 iframe（测试时注入 URL）</h3>
+    <iframe id="f2" src="about:blank"></iframe>
+
+    <h3>srcdoc iframe（match_about_blank 覆盖）</h3>
+    <iframe id="f3" srcdoc="&lt;body style='font:13px system-serif;padding:10px'&gt;&lt;label for='src_name'&gt;姓名&lt;/label&gt;&lt;input id='src_name'&gt;&lt;/body&gt;"></iframe>
+  </div>
+</body>
+</html>

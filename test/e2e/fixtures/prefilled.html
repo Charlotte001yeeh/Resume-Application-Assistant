@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>星辰智能 - 算法平台工程师（简历完善）</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; margin: 0; background: #f6f7f9; color: #222; }
+    .wrap { max-width: 820px; margin: 22px auto; background: #fff; border-radius: 10px; padding: 26px 32px; box-shadow: 0 3px 14px rgba(0,0,0,.05); }
+    h1 { font-size: 19px; }
+    h2 { font-size: 15px; margin: 22px 0 10px; color: #7b3fe4; }
+    .row { margin: 12px 0; }
+    label { display: block; margin-bottom: 4px; color: #444; }
+    textarea, input { width: 100%; padding: 8px 10px; border: 1px solid #cbd3dd; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    textarea { min-height: 88px; }
+    .jd { background: #f4f0ff; border-radius: 8px; padding: 14px 18px; margin: 14px 0; }
+    .jd h3 { margin: 0 0 6px; color: #7b3fe4; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>算法平台工程师 · 简历补充问卷</h1>
+
+    <section class="jd">
+      <h3>职位描述 / 任职要求</h3>
+      <p>我们正在寻找一位关注数据可视化与微前端方向的工程师。你将负责数据可视化平台与微前端架构建设，
+      深入参与性能优化与工程化体系设计。要求熟练掌握 JavaScript，具备数据可视化、微前端、性能优化实战经验，
+      有组件库建设经验者优先。数据可视化能力与微前端经验是本岗位的核心要求，性能优化经验将帮助你快速成长。</p>
+    </section>
+
+    <h2>请补充以下内容</h2>
+    <div class="row">
+      <label for="selfeval">自我评价（不超过 60 字）</label>
+      <textarea id="selfeval" name="selfeval" data-state="selfeval" maxlength="60">我是一名资深的前端开发工程师，在互联网行业摸爬滚打多年，做过很多大大小小的项目，自认为技术基础还算扎实，沟通能力也不错，希望能找到一份满意的工作继续发展下去。</textarea>
+    </div>
+    <div class="row">
+      <label for="skills">技能特长</label>
+      <textarea id="skills" name="skills" data-state="skills">熟悉前端开发，具备良好的工程化意识。</textarea>
+    </div>
+    <div class="row">
+      <label for="highlights">个人亮点</label>
+      <textarea id="highlights" name="highlights" data-state="highlights"></textarea>
+    </div>
+    <div class="row">
+      <label for="why">为什么想加入我们公司</label>
+      <textarea id="why" name="why" data-state="why"></textarea>
+    </div>
+  </div>
+
+  <script>
+    window.__cvEvents = {};
+    for (const type of ['input', 'change']) {
+      document.addEventListener(type, (e) => {
+        const t = e.target;
+        const key = (t.id || t.name || t.tagName) + ':' + type;
+        window.__cvEvents[key] = (window.__cvEvents[key] || 0) + 1;
+      }, true);
+    }
+  </script>
+</body>
+</html>

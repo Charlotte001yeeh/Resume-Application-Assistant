@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>网申表 - 51job 式表格布局</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; background: #f5f6f8; margin: 0; }
+    .wrap { max-width: 900px; margin: 24px auto; background: #fff; padding: 22px 26px; }
+    table { width: 100%; border-collapse: collapse; }
+    td { border: 1px solid #e5e8ee; padding: 7px 10px; }
+    td.label { width: 130px; background: #f0f3f8; text-align: right; }
+    .group { background: #e8eef9; font-weight: 600; }
+    .req { color: #d33; }
+    input, select, textarea { width: 92%; padding: 6px 8px; border: 1px solid #ccd3dd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>校园招聘网申表</h1>
+    <table>
+      <!-- several label/control groups per row (typical of 51job) -->
+      <tr>
+        <td class="label">姓名 <span class="req">*</span></td>
+        <td><input type="text" id="t_name" /></td>
+        <td class="label">手机 <span class="req">*</span></td>
+        <td><input type="text" id="t_phone" /></td>
+        <td class="label">邮箱 <span class="req">*</span></td>
+        <td><input type="text" id="t_email" /></td>
+      </tr>
+      <!-- group heading row (typical of Beisen/51job) -->
+      <tr><td class="group" colspan="6">教育及求职信息</td></tr>
+      <tr>
+        <td class="label">最高学历</td>
+        <td>
+          <select id="t_edu">
+            <option value="">请选择</option>
+            <option value="v0">专科</option>
+            <option value="v1">本科</option>
+            <option value="v2">硕士</option>
+            <option value="v3">博士</option>
+          </select>
+        </td>
+        <td class="label">毕业院校</td>
+        <td><input type="text" id="t_school" /></td>
+        <td class="label">所学专业</td>
+        <td><input type="text" id="t_major" /></td>
+      </tr>
+      <tr>
+        <td class="label">期望职位</td>
+        <td><input type="text" id="t_wantjob" /></td>
+        <td class="label">期望薪资（元/月）</td>
+        <td><input type="text" id="t_salary" /></td>
+        <td class="label">到岗时间</td>
+        <td>
+          <select id="t_arrive">
+            <option value="">请选择</option>
+            <option value="v0">随时到岗</option>
+            <option value="v1">一周内</option>
+            <option value="v2">一个月内</option>
+          </select>
+        </td>
+      </tr>
+      <!-- low-confidence fields (produce review-tier items for batch confirmation) -->
+      <tr><td class="group" colspan="6">补充信息</td></tr>
+      <tr>
+        <td class="label">手机（家庭）</td>
+        <td><input type="text" id="t_homephone" /></td>
+        <td class="label">邮箱（备用）</td>
+        <td><input type="text" id="t_altmail" /></td>
+        <td class="label">自我评价</td>
+        <td><textarea id="t_selfeval"></textarea></td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

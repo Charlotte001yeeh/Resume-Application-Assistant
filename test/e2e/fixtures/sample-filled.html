@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>示例科技 - 已填写完成的申请表（样例）</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; margin: 0; background: #f5f7fa; color: #222; }
+    .wrap { max-width: 760px; margin: 24px auto; background: #fff; border-radius: 10px; padding: 28px 36px; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
+    h1 { font-size: 20px; border-bottom: 2px solid #1a7f37; padding-bottom: 10px; }
+    .done { color: #1a7f37; font-size: 13px; }
+    .row { margin: 14px 0; }
+    label { display: block; margin-bottom: 4px; color: #555; }
+    input, textarea { width: 100%; padding: 8px 10px; border: 1px solid #cfd6e0; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    textarea { min-height: 88px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>高级前端工程师 · 申请表（<span class="done">已填写完成</span>）</h1>
+    <p class="done">✔ 你已手工完成这份投递。点 CV 按钮 →「样例学习」，插件会把你的手写内容当样例学习。</p>
+
+    <div class="row">
+      <label for="nickname">怎么称呼你</label>
+      <input type="text" id="full_name" data-state="nickname" autocomplete="name" value="张三" />
+    </div>
+    <div class="row">
+      <label for="whyjoin">为什么想加入我们公司</label>
+      <textarea id="whyjoin" name="whyjoin" data-state="whyjoin">贵司在数据智能方向的布局与我长期深耕的前端架构方向高度契合，我希望在更大规模的业务场景中带团队攻克复杂交互与性能难题，把数据可视化做成真正好用的产品。</textarea>
+    </div>
+    <div class="row">
+      <label for="proud">请分享一次让你自豪的技术攻坚经历</label>
+      <textarea id="proud" name="proud" data-state="proud">主导过从 0 到 1 的大屏可视化攻坚：渲染耗时从 3s 降到 400ms，支撑日均 5 万次访问；最自豪的是带 3 人小组两周完成交付，沉淀了一套可复用的渲染优化方案。</textarea>
+    </div>
+    <div class="row">
+      <label for="anything">还有什么想告诉我们的</label>
+      <textarea id="anything" name="anything" data-state="anything">期待与团队一起把数据可视化平台做成行业标杆，可接受合理的出差安排。</textarea>
+    </div>
+  </div>
+</body>
+</html>

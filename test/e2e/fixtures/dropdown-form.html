@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>点击后下拉选择 - 自定义控件（北森/element-ui 风格）</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; background: #f6f7f9; margin: 0; }
+    .wrap { max-width: 760px; margin: 24px auto; background: #fff; padding: 24px 30px; border-radius: 8px; }
+    .form-row { margin: 16px 0; display: flex; align-items: center; gap: 12px; }
+    .form-row label { width: 130px; text-align: right; color: #555; }
+    .select-box { position: relative; flex: 1; }
+    input.select-input, .combo-div { width: 100%; padding: 8px 10px; border: 1px solid #ccd3dd; border-radius: 4px; background: #fff; cursor: pointer; }
+    .combo-div { min-height: 20px; }
+    .dropdown-menu { position: absolute; left: 0; top: 100%; z-index: 10; background: #fff; border: 1px solid #ccd3dd; margin: 2px 0 0; padding: 0; list-style: none; min-width: 200px; display: none; }
+    .dropdown-menu li { padding: 7px 12px; cursor: pointer; }
+    .dropdown-menu li:hover { background: #eef3ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>入职信息（自定义下拉控件）</h1>
+    <p class="muted" style="color:#888">控件需<b>点击后</b>弹出选项列表再点选（非原生 select），模拟北森/element-ui 类组件。</p>
+
+    <div class="form-row">
+      <label for="c_city">期望工作城市</label>
+      <div class="select-box">
+        <input type="text" id="c_city" class="select-input" readonly value="" />
+        <ul class="dropdown-menu" id="menu_city"><li role="option">北京</li><li role="option">上海</li><li role="option">广州</li></ul>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="c_jobtype">工作性质</label>
+      <div class="select-box">
+        <input type="text" id="c_jobtype" class="select-input" readonly value="" />
+        <ul class="dropdown-menu" id="menu_jobtype"><li role="option">全职</li><li role="option">兼职</li><li role="option">实习</li></ul>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="c_arrive">到岗时间</label>
+      <div class="select-box">
+        <input type="text" id="c_arrive" class="select-input" readonly value="" />
+        <ul class="dropdown-menu" id="menu_arrive"></ul><!-- delayed rendering: options only appear 80ms after the click -->
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>期望职位</label>
+      <div class="select-box">
+        <div id="c_position" class="combo-div" role="combobox" aria-haspopup="listbox" tabindex="0"></div>
+        <ul class="dropdown-menu" id="menu_position"><li role="option">资深前端架构师</li><li role="option">前端架构师</li><li role="option">技术专家</li></ul>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="c_idtype">证件类型</label>
+      <div class="select-box">
+        <input type="text" id="c_idtype" class="select-input" readonly value="" />
+        <ul class="dropdown-menu" id="menu_idtype"><li role="option">身份证</li><li role="option">护照</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // custom dropdown widget behaviour: clicking the trigger opens the options; picking one writes the value and dispatches change
+    function wire(inputId, menuId, options, delayed) {
+      const input = document.getElementById(inputId);
+      const menu = document.getElementById(menuId);
+      function bind() {
+        menu.querySelectorAll('li').forEach((li) => {
+          li.onclick = () => {
+            input.value = li.textContent.trim();
+            menu.style.display = 'none';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          };
+        });
+      }
+      input.addEventListener('click', () => {
+        if (delayed && !menu.dataset.built) {
+          setTimeout(() => {
+            menu.innerHTML = options.map((o) => '<li role="option">' + o + '</li>').join('');
+            menu.dataset.built = '1';
+            menu.style.display = 'block';
+            bind();
+          }, 80);
+          return;
+        }
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        bind();
+      });
+    }
+    wire('c_city', 'menu_city', [], false);
+    wire('c_jobtype', 'menu_jobtype', [], false);
+    wire('c_arrive', 'menu_arrive', ['随时到岗', '一周内', '一个月内', '面议'], true);
+    wire('c_idtype', 'menu_idtype', [], false);
+
+    // div-based combobox (role=combobox)
+    (function () {
+      const div = document.getElementById('c_position');
+      const menu = document.getElementById('menu_position');
+      div.addEventListener('click', () => {
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        menu.querySelectorAll('li').forEach((li) => {
+          li.onclick = () => {
+            div.textContent = li.textContent.trim();
+            menu.style.display = 'none';
+            div.dispatchEvent(new Event('change', { bubbles: true }));
+          };
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

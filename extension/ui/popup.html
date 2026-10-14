@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- CV Plugin — popup.html: toolbar quick panel (fill / resume check / sample learning / backup). -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CV Plugin - Resume Application Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { width: 330px; padding: 14px 16px; }
+    .stat-line { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+    .stat-line b { font-weight: 600; }
+    #result { margin-top: 10px; font-size: 12px; color: var(--cv-muted); white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Resume Application Assistant</h1>
+  <div class="muted" id="siteInfo">Current page: loading…</div>
+
+  <div class="card" style="margin:12px 0">
+    <div class="stat-line"><span>Active profile</span><b id="profileName">-</b></div>
+    <div class="stat-line"><span>Profile fields</span><b id="fieldCount">-</b></div>
+    <div class="stat-line"><span>Auto-fill</span><b id="autoFillState">-</b></div>
+    <div class="stat-line"><span>Storage</span><b>chrome.storage.local (this device)</b></div>
+  </div>
+
+  <div class="row">
+    <button class="primary" id="btnFill">Fill This Page</button>
+    <button id="btnReview">Resume Check</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <button id="btnStudy">Sample Learning (filled page)</button>
+    <button id="btnLearn">Learn from This Page</button>
+    <button id="btnBackup">Backup to Folder</button>
+    <button id="btnOptions">Open Profile Manager</button>
+  </div>
+  <div id="result"></div>
+  <div class="row" style="margin-top:8px;align-items:center;gap:8px">
+    <span class="muted">UI language</span>
+    <select id="langSelect" style="max-width:150px">
+      <option value="en">English</option>
+      <option value="zh">中文</option>
+    </select>
+    <label class="muted" style="display:flex;align-items:center;gap:5px"><input type="checkbox" id="fabToggle" /><span>Floating ball</span></label>
+  </div>
+
+  <script src="../src/core/util.js"></script>
+  <script src="../src/core/schema.js"></script>
+  <script src="../src/core/lexicon.js"></script>
+  <script src="../src/core/store.js"></script>
+  <script src="../src/core/backup.js"></script>
+  <script src="../src/core/i18n.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

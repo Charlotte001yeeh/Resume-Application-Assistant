@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>示例科技 - 高级前端工程师申请表</title>
+  <style>
+    body { font: 14px/1.7 system-ui, "Microsoft YaHei", sans-serif; margin: 0; background: #f5f7fa; color: #222; }
+    .wrap { max-width: 760px; margin: 24px auto; background: #fff; border-radius: 10px; padding: 28px 36px; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
+    h1 { font-size: 20px; border-bottom: 2px solid #2b6df6; padding-bottom: 10px; }
+    h2 { font-size: 15px; margin: 26px 0 12px; color: #2b6df6; }
+    .form-group { display: flex; align-items: flex-start; margin: 12px 0; }
+    .form-group > label { width: 130px; padding-top: 7px; color: #555; }
+    .form-group > label .req { color: #d33; }
+    .form-group .ctrl { flex: 1; }
+    input[type=text], input[type=tel], input[type=email], input[type=date], input[type=number], select, textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid #cfd6e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;
+    }
+    textarea { min-height: 84px; }
+    fieldset { border: 1px solid #cfd6e0; border-radius: 6px; margin: 12px 0; padding: 10px 14px; }
+    legend { color: #555; padding: 0 6px; }
+    .hint { color: #999; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>高级前端工程师 · 入职申请表</h1>
+    <p class="hint">请如实填写以下信息，带 <span style="color:#d33">*</span> 为必填项。</p>
+
+    <h2>基本信息</h2>
+    <div class="form-group">
+      <label for="realname">你的姓名 <span class="req">*</span></label>
+      <div class="ctrl"><input type="text" id="realname" name="realname" data-state="realname" autocomplete="name" placeholder="请输入真实姓名" required /></div>
+    </div>
+    <div class="form-group">
+      <label for="mobile">手机号码 <span class="req">*</span></label>
+      <div class="ctrl"><input type="tel" id="mobile" name="mobile" data-state="mobile" autocomplete="tel" placeholder="请输入常用手机号" required /></div>
+    </div>
+    <div class="form-group">
+      <label for="mail">电子邮箱 <span class="req">*</span></label>
+      <div class="ctrl"><input type="email" id="mail" name="mail" data-state="mail" autocomplete="email" placeholder="用于接收面试通知" /></div>
+    </div>
+    <div class="form-group">
+      <label for="sex">性别</label>
+      <div class="ctrl">
+        <select id="sex" name="sex" data-state="sex">
+          <option value="">请选择</option>
+          <option value="v0">男</option>
+          <option value="v1">女</option>
+          <option value="v2">保密</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="birthday">出生日期</label>
+      <div class="ctrl"><input type="date" id="birthday" name="birthday" data-state="birthday" /></div>
+    </div>
+    <div class="form-group">
+      <label for="idcard">身份证号</label>
+      <div class="ctrl"><input type="text" id="idcard" name="idcard" data-state="idcard" placeholder="18 位身份证号码" /></div>
+    </div>
+    <div class="form-group">
+      <label for="political">政治面貌</label>
+      <div class="ctrl">
+        <select id="political" name="political" data-state="political">
+          <option value="">请选择</option>
+          <option value="v0">中共党员</option>
+          <option value="v1">共青团员</option>
+          <option value="v2">群众</option>
+          <option value="v3">其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="livecity">现居住地</label>
+      <div class="ctrl"><input type="text" id="livecity" name="livecity" data-state="livecity" placeholder="如：北京市海淀区" /></div>
+    </div>
+    <div class="form-group">
+      <label for="homeaddr">通讯地址</label>
+      <div class="ctrl"><textarea id="homeaddr" name="homeaddr" data-state="homeaddr" placeholder="详细通讯地址"></textarea></div>
+    </div>
+    <div class="form-group">
+      <label for="zipcode">邮政编码</label>
+      <div class="ctrl"><input type="text" id="zipcode" name="zipcode" data-state="zipcode" /></div>
+    </div>
+
+    <h2>教育背景</h2>
+    <div class="form-group">
+      <label for="edu">最高学历</label>
+      <div class="ctrl">
+        <select id="edu" name="edu" data-state="edu">
+          <option value="">请选择</option>
+          <option value="v0">专科</option>
+          <option value="v1">本科</option>
+          <option value="v2">硕士</option>
+          <option value="v3">博士</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="school">毕业院校</label>
+      <div class="ctrl"><input type="text" id="school" name="school" data-state="school" /></div>
+    </div>
+    <div class="form-group">
+      <label for="major">专业</label>
+      <div class="ctrl"><input type="text" id="major" name="major" data-state="major" /></div>
+    </div>
+    <div class="form-group">
+      <label for="gradtime">毕业时间</label>
+      <div class="ctrl"><input type="text" id="gradtime" name="gradtime" data-state="gradtime" placeholder="如：2020年6月" /></div>
+    </div>
+
+    <h2>工作经历</h2>
+    <div class="form-group">
+      <label for="workyears">工作年限</label>
+      <div class="ctrl"><input type="number" id="workyears" name="workyears" data-state="workyears" min="0" /></div>
+    </div>
+    <div class="form-group">
+      <label for="company">目前公司</label>
+      <div class="ctrl"><input type="text" id="company" name="company" data-state="company" /></div>
+    </div>
+    <div class="form-group">
+      <label for="jobtitle">目前职位</label>
+      <div class="ctrl"><input type="text" id="jobtitle" name="jobtitle" data-state="jobtitle" /></div>
+    </div>
+
+    <h2>求职期望</h2>
+    <div class="form-group">
+      <label for="wantjob">期望职位</label>
+      <div class="ctrl"><input type="text" id="wantjob" name="wantjob" data-state="wantjob" /></div>
+    </div>
+    <div class="form-group">
+      <label for="wantcity">期望工作城市</label>
+      <div class="ctrl"><input type="text" id="wantcity" name="wantcity" data-state="wantcity" /></div>
+    </div>
+    <div class="form-group">
+      <label for="salary">期望月薪</label>
+      <div class="ctrl"><input type="text" id="salary" name="salary" data-state="salary" placeholder="如：25k-35k" /></div>
+    </div>
+    <div class="form-group">
+      <label for="arrive">到岗时间</label>
+      <div class="ctrl">
+        <select id="arrive" name="arrive" data-state="arrive">
+          <option value="">请选择</option>
+          <option value="v0">随时到岗</option>
+          <option value="v1">一周内</option>
+          <option value="v2">一个月内</option>
+          <option value="v3">面议</option>
+        </select>
+      </div>
+    </div>
+    <fieldset>
+      <legend>工作性质</legend>
+      <label><input type="radio" name="jobtype" value="v0" data-state="jobtype" /> 全职</label>
+      <label><input type="radio" name="jobtype" value="v1" data-state="jobtype" /> 兼职</label>
+      <label><input type="radio" name="jobtype" value="v2" data-state="jobtype" /> 实习</label>
+    </fieldset>
+
+    <h2>其他信息</h2>
+    <fieldset>
+      <legend>语言能力</legend>
+      <label><input type="checkbox" name="langs" value="v0" data-state="langs" /> 英语</label>
+      <label><input type="checkbox" name="langs" value="v1" data-state="langs" /> 日语</label>
+      <label><input type="checkbox" name="langs" value="v2" data-state="langs" /> 法语</label>
+      <label><input type="checkbox" name="langs" value="v3" data-state="langs" /> 普通话</label>
+    </fieldset>
+    <div class="form-group">
+      <label for="selfeval">自我评价</label>
+      <div class="ctrl"><textarea id="selfeval" name="selfeval" data-state="selfeval" maxlength="200"></textarea></div>
+    </div>
+    <div class="form-group">
+      <label for="hobby">兴趣爱好</label>
+      <div class="ctrl"><input type="text" id="hobby" name="hobby" data-state="hobby" /></div>
+    </div>
+    <div class="form-group">
+      <label for="companytel">公司电话</label>
+      <div class="ctrl"><input type="text" id="companytel" name="companytel" data-state="companytel" placeholder="用于商务联系" /></div>
+    </div>
+  </div>
+
+  <script>
+    // controlled-component simulation: JS keeps state and writes it back on re-render (verifies that input/change events really reach the "framework layer")
+    window.__cvState = {};
+    window.__cvEvents = {};
+    document.addEventListener('input', (e) => {
+      const t = e.target;
+      const key = (t.id || t.name || t.tagName) + ':input';
+      window.__cvEvents[key] = (window.__cvEvents[key] || 0) + 1;
+      if (t.dataset && t.dataset.state) window.__cvState[t.dataset.state] = t.type === 'checkbox' || t.type === 'radio' ? t.checked : t.value;
+    }, true);
+    document.addEventListener('change', (e) => {
+      const t = e.target;
+      const key = (t.id || t.name || t.tagName) + ':change';
+      window.__cvEvents[key] = (window.__cvEvents[key] || 0) + 1;
+      if (t.dataset && t.dataset.state) window.__cvState[t.dataset.state] = t.type === 'checkbox' || t.type === 'radio' ? t.checked : t.value;
+    }, true);
+    window.__cvRerender = () => {
+      for (const [k, v] of Object.entries(window.__cvState)) {
+        const el = document.querySelector('[data-state="' + k + '"]');
+        if (!el) continue;
+        if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!v;
+        else el.value = v;
+      }
+      return Object.keys(window.__cvState).length;
+    };
+  </script>
+</body>
+</html>
